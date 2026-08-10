@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2.2";
+const VERSION = "3.2.3";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -639,7 +639,7 @@ function phaseLabel(x){return x==="setup"?"初期配置":x==="production"?"生�
 function render(){
   if(!S)return;
   $("turnLabel").textContent=`第${S.round}巡 / ${player().name} / ${phaseLabel(S.phase)} / ${S.setupMode==="beginner"?"初心者用固定配置":S.setupMode==="strategic"?"Strategic":S.setupMode==="explorer"?"Explorer":"Wild Space"}`;
-  renderPlayers();renderResources();renderPhases();renderBoard();renderVictoryRoadmap();renderSupplyPanel();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderPinControl();
+  renderPlayers();renderResources();renderBoard();renderVictoryRoadmap();renderSupplyPanel();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderPinControl();
   save();
 }
 function renderDiceStatus(){
@@ -654,7 +654,8 @@ function renderDiceStatus(){
   }
 }
 function renderPlayers(){
-  $("playersPanel").innerHTML=`<div class="panel-title">プレイヤー</div>`+S.players.map((p,i)=>{
+  const panel=$("playersPanel");if(!panel)return;
+  panel.innerHTML=`<div class="panel-title">プレイヤー</div>`+S.players.map((p,i)=>{
     const markers=Object.entries(S.friendshipMarkerHolder).filter(([k,v])=>v===p.id).map(([k])=>OUTPOSTS[k].icon).join("");
     return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""}" data-player-card="${i}" title="クリックで${p.name}の友好カードを確認">
       <div class="player-top"><span class="player-name" style="color:${p.color}">${p.name}${i===mySeat()?'<span class="badge">YOU</span>':""}${!p.human?'<span class="badge cpu-player-badge">CPU</span>':""}</span><div class="vp-stack"><span class="vp">${p.vp} VP</span><span class="fame-vp">🏅 名声片 ${p.famePieces}（${Math.floor(p.famePieces/2)}VP）${p.permanentMedals?`　◆特殊VP ${p.permanentMedals}`:""}</span></div></div>
@@ -680,9 +681,10 @@ function showPlayerFriendship(p){
   modalPromise(`<h2>${p.name} の友好カード</h2>${markers?`<p class="friend-marker-line">友好マーカー：${markers}</p>`:""}<div class="player-friend-list">${body}</div>`,[{label:"閉じる",value:true,primary:true}]);
 }
 function renderResources(){
+  const panel=$("resourcePanel");if(!panel)return;
   const p=me();
   const marker=(p.tradeShipMarkersHeld||0)>0?`<div class="resource-row resource-marker-row"><div><div class="resource-name">■ 無料交易船マーカー</div><div class="marker-note">最初に配置可能になった機会で必ず無料交易船を置く</div></div><div class="resource-count">${p.tradeShipMarkersHeld}</div></div>`:"";
-  $("resourcePanel").innerHTML=R.map(r=>`<div class="resource-row resource-tile resource-${r}"><div class="resource-name">${RI[r]} ${RL[r]}</div><div class="resource-count">${p.res[r]}</div></div>`).join("")+marker;
+  panel.innerHTML=R.map(r=>`<div class="resource-row resource-tile resource-${r}"><div class="resource-name">${RI[r]} ${RL[r]}</div><div class="resource-count">${p.res[r]}</div></div>`).join("")+marker;
 }
 function renderVictoryRoadmap(){
   const el=$("victoryRoadmap");if(!el)return;const cells=[];
@@ -721,9 +723,7 @@ function renderMothership(){
     $("speedResult").innerHTML=`${S.balls.map(b=>b.emoji+(!b.black?b.v:"")).join(" + ")}<br>基本 ${S.baseSpeed} ＋補正 ${totalSpeedBonus(p)} ＝ <strong>${S.speed}</strong>`;
   }else $("speedResult").textContent="飛行フェイズで母船を振ります";
 }
-function renderPhases(){
-  ["Prod","Build","Flight"].forEach(x=>$("phase"+x).classList.remove("active"));
-  if(S.phase==="production")$("phaseProd").classList.add("active");else if(S.phase==="build")$("phaseBuild").classList.add("active");else if(S.phase==="flight")$("phaseFlight").classList.add("active");
+function renderPhases(){ /* フェイズ表示はトップのターン表示へ統合済み */
 }
 function svg(tag,attrs={}){const e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e}
 function planetFill(r){return {ore:"#b64e52",fuel:"#e1842d",carbon:"#347fbd",food:"#3c9e68",goods:"#9a73c8"}[r]}
@@ -948,7 +948,7 @@ function boardHint(){
   return `${sh.type==="colony"?"植民船▲":"交易船■"} / 残り移動力 ${rem} / 到達可能 ${count}地点${sh.stopped?" / このターン停止":""}`;
 }
 function renderHomes(){}
-function renderLog(){$("log").innerHTML=S.logs.map(x=>`<div class="log-entry"><span>${x.t}</span> <strong>${x.msg}</strong></div>`).join("")}
+function renderLog(){const el=$("log");if(!el)return;el.innerHTML=S.logs.map(x=>`<div class="log-entry"><span>${x.t}</span> <strong>${x.msg}</strong></div>`).join("")}
 function renderFriendship(){ /* 友好カードはプレイヤー欄クリックで確認 */ }
 function canPlacePendingFreeTradeShip(p){
   return !!p && (p.pendingFreeTradeShips||0)>0 && p.stock.transports>0 && p.stock.tradeStations>0 && freeLaunchSites(p).length>0;
@@ -1034,8 +1034,9 @@ function buildStockInfo(p,k){
   return {main:"",sub:""};
 }
 function renderBuild(){
+  const area=$("buildArea");if(!area)return;
   const p=me(),phaseEnabled=isMyTurn()&&S.phase==="build"&&!ui.busy&&!pendingFreeTradeShipBlocks(p);
-  $("buildArea").innerHTML=Object.entries(BUILD).map(([k,v])=>{
+  area.innerHTML=Object.entries(BUILD).map(([k,v])=>{
     const actionable=phaseEnabled&&canBuild(p,k),stock=buildStockInfo(p,k);
     return `<button class="catan-build-btn${actionable?"":" build-nonclick"}" data-build="${k}" aria-disabled="${actionable?"false":"true"}" title="${phaseEnabled?(canBuild(p,k)?"建設できます":"必要資源・在庫などの条件を満たしていません"):"交易・建設フェイズで建設できます"}">
       <span class="build-icon-wrap">${buildPieceIcon(k)}</span>
@@ -1058,15 +1059,17 @@ function canBuild(p,k){
   return false;
 }
 function renderBank(){
+  const area=$("bankTradeArea");if(!area)return;
   const p=me(),enabled=isMyTurn()&&S.phase==="build"&&!ui.busy&&!pendingFreeTradeShipBlocks(p);
-  $("bankTradeArea").innerHTML=`<div class="bank-row"><select id="bankGive">${R.map(r=>`<option value="${r}">${RL[r]}</option>`).join("")}</select><select id="bankGet">${R.map(r=>`<option value="${r}">${RL[r]}</option>`).join("")}</select></div><div class="bank-action-row"><div id="bankRateBadge" class="bank-rate-badge"></div><button id="bankBtn" ${enabled?"":"disabled"}>供給と交換</button></div>`;
-  const refreshRate=()=>{const give=$("bankGive")?.value;if(!give)return;const rate=bankRate(me(),give);$("bankRateBadge").innerHTML=`${RI[give]} ${RL[give]} <b>${rate}:1</b>`};
-  $("bankGive").onchange=refreshRate;$("bankGet").onchange=refreshRate;refreshRate();$("bankBtn").onclick=bankTrade;
+  area.innerHTML=`<div class="bank-row"><select id="bankGive">${R.map(r=>`<option value="${r}">${RL[r]}</option>`).join("")}</select><select id="bankGet">${R.map(r=>`<option value="${r}">${RL[r]}</option>`).join("")}</select></div><div class="bank-action-row"><div id="bankRateBadge" class="bank-rate-badge"></div><button id="bankBtn" ${enabled?"":"disabled"}>供給と交換</button></div>`;
+  const refreshRate=()=>{const give=$("bankGive")?.value,badge=$("bankRateBadge");if(!give||!badge)return;const rate=bankRate(me(),give);badge.innerHTML=`${RI[give]} ${RL[give]} <b>${rate}:1</b>`};
+  const giveSel=$("bankGive"),getSel=$("bankGet"),bankBtn=$("bankBtn");if(giveSel)giveSel.onchange=refreshRate;if(getSel)getSel.onchange=refreshRate;refreshRate();if(bankBtn)bankBtn.onclick=bankTrade;
 }
 function renderPlayerTrade(){
+  const area=$("playerTradeArea");if(!area)return;
   const enabled=isMyTurn()&&S.phase==="build"&&!ui.busy&&!pendingFreeTradeShipBlocks(me());
-  $("playerTradeArea").innerHTML=`<button id="tradeOpenBtn" class="trade-open-btn" ${enabled?"":"disabled"}>🤝 プレイヤーと交易</button>`;
-  $("tradeOpenBtn").onclick=()=>openCatanTrade();
+  area.innerHTML=`<button id="tradeOpenBtn" class="trade-open-btn" ${enabled?"":"disabled"}>🤝 プレイヤーと交易</button>`;
+  const tradeBtn=$("tradeOpenBtn");if(tradeBtn)tradeBtn.onclick=()=>openCatanTrade();
 }
 function tradeBundleText(bundle){
   const items=R.filter(r=>(bundle[r]||0)>0).map(r=>`${RI[r]}${RL[r]}×${bundle[r]}`);

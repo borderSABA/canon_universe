@@ -682,3 +682,7 @@ html,body{height:100%;overflow:hidden}
   #gameScreen .players-side-panel .player-card{padding:4px 5px!important;margin:2px 0!important}
   #gameScreen .right-panel{grid-template-rows:minmax(122px,1fr) minmax(145px,1.2fr) minmax(82px,.68fr) minmax(102px,.75fr)}
 }
+
+/* ONLINE v3.2.3: フェイズバー削除 */
+#gameScreen .phasebar{display:none!important}
+#gameScreen .center-panel{padding-top:0!important}
