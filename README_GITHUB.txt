@@ -1,6 +1,11 @@
-﻿GitHub公開用ファイル
+﻿GitHub公開用ファイル（Worker URL設定済み）
 
-1. 先にCloudflare-Worker/1_DEPLOY_SERVER.batでWorkerを公開してください。
-2. 2_SET_WORKER_URL.batを実行してworkers.dev URLを設定してください。
-3. このフォルダ内のWebファイルをGitHubリポジトリのルートへアップロードしてください。
-4. GitHub Pagesを main / root で公開してください。
+Worker:
+https://starfarers-online.naitoryo7110.workers.dev
+
+1. このフォルダ内のファイルをGitHubリポジトリのルートへアップロードしてください。
+2. GitHubの Settings → Pages を開きます。
+3. Deploy from a branch / main / /(root) を選択して保存します。
+4. 公開されたGitHub Pages URLを開いて動作確認してください。
+
+※ config.js は設定済みなので 2_SET_WORKER_URL.bat の実行は不要です。
