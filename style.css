@@ -1158,3 +1158,60 @@ html,body{height:100%;overflow:hidden}
   #gameScreen .build-panel .cost-chip{font-size:11px!important;padding:2px 4px!important}
   #gameScreen .build-stock-badge{font-size:12px!important}
 }
+
+
+/* =========================================================
+   ONLINE v3.2.7 - 建設必要資源を2列化して大きく表示
+   ========================================================= */
+@media (min-width:1101px){
+  #gameScreen .build-panel .catan-build-btn{
+    grid-template-columns:26px minmax(0,1fr) 42px!important;
+    padding:2px 4px!important;
+    column-gap:3px!important;
+  }
+
+  #gameScreen .build-panel .build-copy strong{
+    font-size:15px!important;
+    line-height:1.05!important;
+    margin:0 0 3px!important;
+  }
+
+  #gameScreen .build-panel .build-costs{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:3px 4px!important;
+    width:100%!important;
+    margin:0!important;
+    align-items:stretch!important;
+  }
+
+  #gameScreen .build-panel .cost-chip{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:0!important;
+    width:100%!important;
+    font-size:14px!important;
+    line-height:1.05!important;
+    font-weight:1000!important;
+    padding:4px 3px!important;
+    border-radius:7px!important;
+    white-space:nowrap!important;
+  }
+
+  #gameScreen .build-stock-badge{
+    font-size:13px!important;
+    min-width:42px!important;
+  }
+}
+
+/* 高さが低めでも必要資源は十分読めるサイズを維持 */
+@media (max-height:820px) and (min-width:1101px){
+  #gameScreen .build-panel .build-copy strong{
+    font-size:14px!important;
+  }
+  #gameScreen .build-panel .cost-chip{
+    font-size:13px!important;
+    padding:3px 2px!important;
+  }
+}
