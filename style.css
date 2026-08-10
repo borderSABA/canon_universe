@@ -851,3 +851,215 @@ html,body{height:100%;overflow:hidden}
   #gameScreen .resource-panel .resource-name{font-size:10px!important}
   #gameScreen .resource-panel .resource-count{font-size:15px!important}
 }
+
+
+/* =========================================================
+   ONLINE v3.2.5: 情報密度と文字サイズの最終調整
+   ========================================================= */
+@media(min-width:1101px){
+  /* 右端は少し広げ、プレイヤー文字を折り返さず読める幅を確保 */
+  #gameScreen .layout{
+    grid-template-columns:minmax(590px,1fr) minmax(380px,415px) 326px!important;
+  }
+
+  /* プレイヤー欄は内容分だけ。余った縦幅をログへ全投入 */
+  #gameScreen .players-side-panel{
+    grid-template-rows:max-content minmax(0,1fr)!important;
+    gap:4px!important;
+  }
+  #gameScreen .players-side-panel #playersPanel{
+    padding:5px 6px!important;
+    overflow:hidden!important;
+  }
+  #gameScreen .players-side-panel #playersPanel>.panel-title{
+    font-size:12px!important;
+    margin-bottom:3px!important;
+    line-height:1.1!important;
+  }
+  #gameScreen .players-side-panel .player-card{
+    padding:4px 6px!important;
+    margin:3px 0!important;
+    border-radius:7px!important;
+  }
+  #gameScreen .players-side-panel .player-top{
+    gap:5px!important;
+    min-width:0;
+    align-items:center;
+  }
+  #gameScreen .players-side-panel .player-name{
+    flex:1 1 auto;
+    min-width:0;
+    font-size:13px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #gameScreen .players-side-panel .badge{
+    font-size:7px!important;
+    padding:1px 4px!important;
+    vertical-align:1px;
+  }
+  #gameScreen .players-side-panel .vp-stack{
+    flex:0 0 auto;
+    min-width:102px;
+    align-items:flex-end;
+  }
+  #gameScreen .players-side-panel .vp{
+    font-size:18px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .players-side-panel .fame-vp{
+    font-size:8px!important;
+    line-height:1.12!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .players-side-panel .player-mini{
+    font-size:10px!important;
+    line-height:1.15!important;
+    margin-top:2px!important;
+    white-space:nowrap!important;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #gameScreen .player-stat-grid{
+    gap:3px!important;
+    margin-top:3px!important;
+  }
+  #gameScreen .player-stat-grid>span{
+    padding:3px 2px!important;
+    border-radius:6px!important;
+    gap:3px!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .player-stat-grid small{font-size:9px!important;line-height:1!important}
+  #gameScreen .player-stat-grid b{font-size:13px!important;line-height:1!important}
+  #gameScreen .friendship-marker-mini{font-size:8px!important;margin-top:2px!important}
+
+  /* ログはプレイヤー欄を詰めて生まれた残り領域を使用 */
+  #gameScreen .players-log-panel{
+    height:auto!important;
+    min-height:0!important;
+    padding:6px 7px!important;
+  }
+  #gameScreen .players-log-panel .panel-title{
+    font-size:11px!important;
+    margin-bottom:4px!important;
+  }
+  #gameScreen .players-log-panel .log{
+    height:calc(100% - 18px)!important;
+    font-size:9px!important;
+    line-height:1.4!important;
+  }
+  #gameScreen .players-log-panel .log-entry{padding:3px 0!important}
+
+  /* 現在状況：補助文は廃止。固定ロール欄＋大ボタンだけ */
+  #gameScreen .right-panel{
+    grid-template-rows:142px minmax(214px,1.32fr) minmax(128px,.76fr) minmax(114px,.70fr)!important;
+  }
+  #gameScreen .action-panel{padding:5px 7px!important}
+  #gameScreen .action-panel .panel-title{font-size:12px!important;margin-bottom:3px!important}
+  #gameScreen .action-panel .action-main,
+  #gameScreen .action-panel .setup-help{display:none!important}
+  #gameScreen .action-panel .setup-action-title{
+    font-size:12px!important;
+    line-height:1.15!important;
+    margin:2px 0 4px!important;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  #gameScreen .roll-docks{margin-bottom:4px!important;gap:5px!important}
+  #gameScreen .roll-dock-card{padding:4px 5px!important}
+  #gameScreen .action-buttons{
+    display:grid!important;
+    grid-template-columns:repeat(auto-fit,minmax(135px,1fr));
+    gap:5px!important;
+    margin-top:4px!important;
+  }
+  #gameScreen .action-buttons>button,
+  #gameScreen .setup-option-grid>button{
+    width:100%!important;
+    min-height:50px!important;
+    padding:8px 10px!important;
+    font-size:15px!important;
+    line-height:1.1!important;
+    font-weight:900!important;
+  }
+  #gameScreen .action-buttons .dice-roll-btn{font-size:16px!important}
+
+  /* 建設：2×3を維持して名称・費用・在庫を読みやすく */
+  #gameScreen .build-panel{padding:7px 8px!important}
+  #gameScreen .build-panel .panel-title{font-size:13px!important;margin-bottom:5px!important}
+  #gameScreen .build-panel .build-grid{height:calc(100% - 23px)!important;gap:5px!important}
+  #gameScreen .build-panel .catan-build-btn{
+    padding:5px 6px!important;
+    grid-template-columns:31px minmax(0,1fr) 48px!important;
+    column-gap:4px!important;
+  }
+  #gameScreen .build-panel .build-icon-wrap{height:30px!important;margin-right:2px!important}
+  #gameScreen .build-panel .build-copy strong{
+    font-size:12px!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .build-panel .build-costs{gap:2px!important;margin-top:3px!important;flex-wrap:nowrap!important}
+  #gameScreen .build-panel .cost-chip{font-size:9px!important;padding:2px 3px!important;white-space:nowrap!important}
+  #gameScreen .build-stock-badge{font-size:12px!important;min-width:45px!important;padding:4px 2px!important}
+  #gameScreen .build-stock-sub{font-size:8px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
+
+  /* 自分の資源 */
+  #gameScreen .resource-panel .panel-title{font-size:13px!important}
+  #gameScreen .resource-panel .resource-name{font-size:12px!important;white-space:nowrap!important}
+  #gameScreen .resource-panel .resource-count{font-size:18px!important}
+
+  /* 交易タブ */
+  #gameScreen .trade-panels>.panel{padding:7px!important}
+  #gameScreen .trade-panels .panel-title{font-size:12px!important;margin-bottom:5px!important}
+  #gameScreen .bank-row select{font-size:11px!important;padding:6px 5px!important}
+  #gameScreen .bank-rate-badge{font-size:10px!important;padding:5px 4px!important}
+  #gameScreen .bank-rate-badge b{font-size:13px!important}
+  #gameScreen .bank-action-row button,#gameScreen .trade-open-btn{
+    min-height:38px!important;
+    padding:6px 5px!important;
+    font-size:11px!important;
+    font-weight:900!important;
+  }
+
+  /* 盤面下：余白を使ってロードマップ・在庫を大きく */
+  #gameScreen .center-panel{grid-template-rows:auto minmax(0,1fr) 122px!important}
+  #gameScreen .board-bottom-row{height:122px!important;min-height:122px!important;gap:5px!important}
+  #gameScreen .board-bottom-row .panel{padding:7px 8px!important}
+  #gameScreen .board-bottom-row .panel-title{font-size:12px!important;margin-bottom:5px!important}
+  #gameScreen .board-bottom-row .victory-roadmap{gap:4px!important}
+  #gameScreen .vp-road-cell{height:86px!important;border-radius:8px!important}
+  #gameScreen .vp-road-number{font-size:23px!important;line-height:34px!important}
+  #gameScreen .vp-road-reserve{font-size:9px!important;padding:2px 4px!important}
+  #gameScreen .vp-road-names{font-size:8px!important;bottom:4px!important}
+  #gameScreen .board-bottom-row .supply-grid{gap:5px!important}
+  #gameScreen .supply-tile{padding:7px 7px!important;gap:4px!important}
+  #gameScreen .supply-tile span{font-size:10px!important}
+  #gameScreen .supply-tile b{font-size:19px!important}
+  #gameScreen .supply-tile small{font-size:8px!important}
+
+  /* 惑星タイルの数字 */
+  #gameScreen .planet-num{font-size:20px!important;font-weight:1000!important}
+}
+
+@media(max-height:820px) and (min-width:1101px){
+  #gameScreen .right-panel{grid-template-rows:132px minmax(190px,1.28fr) minmax(116px,.74fr) minmax(104px,.68fr)!important}
+  #gameScreen .center-panel{grid-template-rows:auto minmax(0,1fr) 108px!important}
+  #gameScreen .board-bottom-row{height:108px!important;min-height:108px!important}
+  #gameScreen .vp-road-cell{height:73px!important}
+  #gameScreen .vp-road-number{font-size:20px!important;line-height:29px!important}
+  #gameScreen .players-side-panel .player-card{padding:3px 5px!important;margin:2px 0!important}
+  #gameScreen .players-side-panel .player-name{font-size:12px!important}
+  #gameScreen .players-side-panel .player-mini{font-size:9px!important}
+  #gameScreen .player-stat-grid small{font-size:8px!important}
+  #gameScreen .player-stat-grid b{font-size:12px!important}
+  #gameScreen .build-panel .build-copy strong{font-size:11px!important}
+  #gameScreen .build-panel .cost-chip{font-size:8px!important}
+  #gameScreen .resource-panel .resource-name{font-size:11px!important}
+  #gameScreen .resource-panel .resource-count{font-size:16px!important}
+}

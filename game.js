@@ -973,17 +973,20 @@ function ensurePendingFreeTradeMarkers(p){
 
 function renderActions(){
   const a=$("actionArea"),p=player();
-  if(S.winner!==null){a.innerHTML='<div class="action-main">ゲーム終了</div>';return}
-  if(ui.boardChoice){a.innerHTML=`<div class="setup-action-title">${ui.boardChoice.title}</div><div class="action-main">${ui.boardChoice.message}</div><div class="setup-help">盤面上の光っている場所をクリックしてください。</div>`;return}
-  if(ui.setupOptions){a.innerHTML=`<div class="setup-action-title">${ui.setupOptions.title}</div><div class="action-main">${ui.setupOptions.message}</div><div class="setup-option-grid">${ui.setupOptions.options.map((o,i)=>`<button data-setup-option="${i}" class="${o.primary?"primary":""}">${o.label}</button>`).join("")}</div>`;a.querySelectorAll("[data-setup-option]").forEach(btn=>btn.onclick=()=>resolveSetupOption(ui.setupOptions.options[Number(btn.dataset.setupOption)].value));return}
-  if(!p.human){a.innerHTML=`<div class="action-main">${p.name} が行動しています…</div>`;return}
-  if(window.NET?.online&&!isLocalPlayer(p)){a.innerHTML=`<div class="action-main">${p.name} の操作を待っています…</div>`;return}
+  if(S.winner!==null){a.innerHTML='<div class="setup-action-title">ゲーム終了</div>';return}
+  if(ui.boardChoice){a.innerHTML=`<div class="setup-action-title">${ui.boardChoice.title}</div>`;return}
+  if(ui.setupOptions){
+    a.innerHTML=`<div class="setup-action-title">${ui.setupOptions.title}</div><div class="setup-option-grid">${ui.setupOptions.options.map((o,i)=>`<button data-setup-option="${i}" class="${o.primary?"primary":""}">${o.label}</button>`).join("")}</div>`;
+    a.querySelectorAll("[data-setup-option]").forEach(btn=>btn.onclick=()=>resolveSetupOption(ui.setupOptions.options[Number(btn.dataset.setupOption)].value));return;
+  }
+  if(!p.human){a.innerHTML=`<div class="setup-action-title">${p.name} が行動中</div>`;return}
+  if(window.NET?.online&&!isLocalPlayer(p)){a.innerHTML=`<div class="setup-action-title">${p.name} の操作待ち</div>`;return}
   if(pendingFreeTradeShipBlocks(p)){
-    a.innerHTML=`<div class="setup-action-title">無料交易船を即時配置</div><div class="action-main"><span class="warn">無料交易船を置ける状態になりました。</span><br>公式ルール上、最初に配置可能になった機会で必ず置くため、ほかの操作は配置完了まで保留されます。</div><div class="action-buttons"><button id="freeTradeShipBtn" class="primary">■ 無料交易船 (${p.pendingFreeTradeShips})</button></div>`;
+    a.innerHTML=`<div class="setup-action-title">無料交易船を即時配置</div><div class="action-buttons"><button id="freeTradeShipBtn" class="primary">■ 無料交易船 (${p.pendingFreeTradeShips})</button></div>`;
     $("freeTradeShipBtn").onclick=placePendingFreeTradeShipHuman;return;
   }
   if(S.phase==="production"){
-    a.innerHTML='<div class="action-main">2個のダイスを振って生産します。7なら特別処理です。</div><div class="action-buttons"><button id="rollBtn" class="dice-roll-btn">🎲 ダイスを振る</button></div>';
+    a.innerHTML='<div class="action-buttons"><button id="rollBtn" class="dice-roll-btn">🎲 ダイスを振る</button></div>';
     $("rollBtn").onclick=humanProduction;return;
   }
   if(S.phase==="build"){
@@ -991,19 +994,19 @@ function renderActions(){
     if(hasCard(p,"fameSale")&&!p.turnFlags.fameSale&&p.res.goods>0)special+='<button id="fameSaleBtn">交易品1 → 名声片1</button>';
     const higher=S.players.filter(o=>o.id!==p.id&&o.vp>p.vp);
     if(hasCard(p,"helpingHand")&&!p.turnFlags.helpingHand&&higher.length>=2)special+='<button id="helpingBtn">援助要請を使う</button>';
-    a.innerHTML=`<div class="action-main">交易と建設は好きな順番で何度でも行えます。${p.pendingFreeTradeShips?`<br><span class="warn">無料交易船の未配置：${p.pendingFreeTradeShips}</span>`:""}</div><div class="action-buttons">${special}<button id="toFlight" class="primary">飛行フェイズへ</button></div>`;
+    a.innerHTML=`<div class="action-buttons">${special}<button id="toFlight" class="primary">飛行フェイズへ</button></div>`;
     $("toFlight").onclick=startHumanFlight;
     if($("fameSaleBtn"))$("fameSaleBtn").onclick=useFameSale;
     if($("helpingBtn"))$("helpingBtn").onclick=useHelpingHand;
     return;
   }
   if(S.speed===null){
-    if(!p.ships.length){a.innerHTML='<div class="action-main">盤上に船がないため飛行フェイズを飛ばします。</div><div class="action-buttons"><button id="skipFlight" class="primary">次の手番</button></div>';$("skipFlight").onclick=endHumanTurn;return}
-    a.innerHTML='<div class="action-main">母船を振ります。黒球が出ると、船を動かす前に遭遇を解決します。</div><div class="action-buttons"><button id="shakeBtn" class="primary">🚀 マザーシップを振る</button></div>';
+    if(!p.ships.length){a.innerHTML='<div class="action-buttons"><button id="skipFlight" class="primary">次の手番</button></div>';$("skipFlight").onclick=endHumanTurn;return}
+    a.innerHTML='<div class="action-buttons"><button id="shakeBtn" class="primary">🚀 マザーシップを振る</button></div>';
     $("shakeBtn").onclick=humanShake;return;
   }
   if((p.pendingJump||0)>0){
-    a.innerHTML=`<div class="action-main"><span class="warn">遭遇で得たスペースジャンプを直ちに解決します。</span><br>ジャンプ後、その船の通常移動は終了します。</div><div class="action-buttons"><button id="jumpBtn" class="primary">🌀 スペースジャンプ (${p.pendingJump})</button></div>`;
+    a.innerHTML=`<div class="action-buttons"><button id="jumpBtn" class="primary">🌀 スペースジャンプ (${p.pendingJump})</button></div>`;
     $("jumpBtn").onclick=()=>beginHumanJump();return;
   }
   const sh=ui.selectedShip?p.ships.find(s=>s.id===ui.selectedShip):null;
@@ -1017,7 +1020,7 @@ function renderActions(){
   }
   const invalid=p.ships.some(s=>!canEndAt(p,s,s.node,false));
   const jumpBtn=(p.pendingJump||0)>0&&!ui.jumpMode?`<button id="jumpBtn">🌀 スペースジャンプ (${p.pendingJump})</button>`:"";
-  a.innerHTML=`<div class="action-main">速度 <b>${S.speed}</b>。光っている船を選ぶと、残り移動力で到達できる交点が一括表示されます。行き先を選ぶとそこまで自動移動します。${invalid?'<br><span class="bad">現在停止できない交点に船があります。移動を続けてください。</span>':""}</div><div class="action-buttons">${loc}${jumpBtn}${ui.jumpMode?'<button id="cancelJump">ジャンプ取消</button>':""}<button id="endFlight" class="primary" ${invalid?'disabled':''}>飛行終了</button></div>`;
+  a.innerHTML=`<div class="action-buttons">${loc}${jumpBtn}${ui.jumpMode?'<button id="cancelJump">ジャンプ取消</button>':""}<button id="endFlight" class="primary" ${invalid?'disabled':''}>飛行終了</button></div>`;
   if($("colonizeBtn"))$("colonizeBtn").onclick=()=>humanColonize(sh);
   if($("tradeStationBtn"))$("tradeStationBtn").onclick=async()=>{ui.busy=true;await establishTradeStation(p,sh,getNode(sh.node).outpost,true);ui.busy=false;render()};
   if($("jumpBtn"))$("jumpBtn").onclick=()=>beginHumanJump();
