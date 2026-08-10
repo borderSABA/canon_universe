@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2.3";
+const VERSION = "3.2.8";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -254,7 +254,15 @@ function chooseSetupOption(title,message,options){
   return new Promise(resolve=>{ui.setupOptions={title,message,options:[...options],resolve};render()});
 }
 function resolveSetupOption(value){const x=ui.setupOptions;if(!x)return;ui.setupOptions=null;const fn=x.resolve;render();fn(value)}
-function costChips(cost){return Object.entries(cost).map(([r,n])=>`<span class="cost-chip cost-${r}">${RI[r]}${n}</span>`).join("")}
+function costChips(cost){
+  const items=Object.entries(cost);
+  if(!items.length)return '<span class="build-cost-free">無料</span>';
+  const rows=[];
+  for(let i=0;i<items.length;i+=2){
+    rows.push(`<span class="build-cost-row">${items.slice(i,i+2).map(([r,n])=>`<span class="cost-chip cost-${r}"><span class="cost-icon">${RI[r]}</span><span class="cost-name">${RL[r]}</span><b>${n}</b></span>`).join("")}</span>`);
+  }
+  return rows.join("");
+}
 function buildPieceIcon(k){
   if(k==="colonyShip")return '<span class="piece-icon piece-triangle"></span>';
   if(k==="tradeShip")return '<span class="piece-icon piece-square"></span>';

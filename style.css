@@ -1215,3 +1215,74 @@ html,body{height:100%;overflow:hidden}
     padding:3px 2px!important;
   }
 }
+
+
+/* =========================================================
+   ONLINE v3.2.8 - 建設費DOMを2個×複数行で強制表示
+   ========================================================= */
+#gameScreen .build-panel .build-costs{
+  display:flex!important;
+  flex-direction:column!important;
+  gap:4px!important;
+  width:100%!important;
+  margin:2px 0 0!important;
+}
+#gameScreen .build-panel .build-cost-row{
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:4px!important;
+  width:100%!important;
+}
+#gameScreen .build-panel .cost-chip{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  align-items:center!important;
+  gap:3px!important;
+  width:100%!important;
+  min-width:0!important;
+  padding:5px 5px!important;
+  border-radius:7px!important;
+  font-size:15px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+#gameScreen .build-panel .cost-chip .cost-icon{
+  font-size:15px!important;
+}
+#gameScreen .build-panel .cost-chip .cost-name{
+  font-size:14px!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+#gameScreen .build-panel .cost-chip b{
+  font-size:16px!important;
+  font-weight:1000!important;
+}
+#gameScreen .build-panel .build-copy strong{
+  font-size:16px!important;
+  line-height:1.05!important;
+  margin-bottom:2px!important;
+}
+#gameScreen .build-panel .catan-build-btn{
+  padding:2px 4px!important;
+  grid-template-columns:25px minmax(0,1fr) 42px!important;
+}
+#gameScreen .build-panel .build-icon-wrap{
+  margin-right:1px!important;
+}
+#gameScreen .build-panel .build-stock-sub{
+  font-size:10px!important;
+  line-height:1!important;
+}
+
+/* 低い画面でも建設費は極端に縮めない */
+@media (max-height:820px) and (min-width:1101px){
+  #gameScreen .build-panel .cost-chip{
+    font-size:13px!important;
+    padding:4px 4px!important;
+  }
+  #gameScreen .build-panel .cost-chip .cost-name{font-size:13px!important}
+  #gameScreen .build-panel .cost-chip b{font-size:14px!important}
+  #gameScreen .build-panel .build-copy strong{font-size:14px!important}
+}
