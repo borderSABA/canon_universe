@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2.8";
+const VERSION = "3.2.9";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -257,9 +257,10 @@ function resolveSetupOption(value){const x=ui.setupOptions;if(!x)return;ui.setup
 function costChips(cost){
   const items=Object.entries(cost);
   if(!items.length)return '<span class="build-cost-free">無料</span>';
+  const shortName={ore:"鉱石",fuel:"燃料",goods:"交易",carbon:"炭素",food:"食料"};
   const rows=[];
   for(let i=0;i<items.length;i+=2){
-    rows.push(`<span class="build-cost-row">${items.slice(i,i+2).map(([r,n])=>`<span class="cost-chip cost-${r}"><span class="cost-icon">${RI[r]}</span><span class="cost-name">${RL[r]}</span><b>${n}</b></span>`).join("")}</span>`);
+    rows.push(`<span class="build-cost-row">${items.slice(i,i+2).map(([r,n])=>`<span class="cost-chip cost-${r}"><span class="cost-name">${shortName[r]||RL[r]}</span><b>${n}</b></span>`).join("")}</span>`);
   }
   return rows.join("");
 }
@@ -1051,8 +1052,10 @@ function renderBuild(){
     const actionable=phaseEnabled&&canBuild(p,k),stock=buildStockInfo(p,k);
     return `<button class="catan-build-btn${actionable?"":" build-nonclick"}" data-build="${k}" aria-disabled="${actionable?"false":"true"}" title="${phaseEnabled?(canBuild(p,k)?"建設できます":"必要資源・在庫などの条件を満たしていません"):"交易・建設フェイズで建設できます"}">
       <span class="build-icon-wrap">${buildPieceIcon(k)}</span>
-      <span class="build-copy"><strong>${v.name}</strong><span class="build-costs">${costChips(v.cost)}</span>${stock.sub?`<span class="build-stock-sub">${stock.sub}</span>`:""}</span>
-      <span class="build-stock-badge">${stock.main}</span>
+      <span class="build-copy">
+        <span class="build-title-line"><strong>${v.name}</strong><span class="build-stock-inline">${stock.main}</span>${stock.sub?`<span class="build-stock-sub-inline">${stock.sub}</span>`:""}</span>
+        <span class="build-costs">${costChips(v.cost)}</span>
+      </span>
     </button>`;
   }).join("");
   document.querySelectorAll("[data-build]").forEach(x=>x.onclick=()=>{
