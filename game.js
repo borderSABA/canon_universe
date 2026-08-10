@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.0-online";
+const VERSION = "3.1-online";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -528,7 +528,8 @@ async function runAdvancedSetup(){
   }
   for(const p of S.players){drawReserve(p,3);gainFame(p,1)}
   S.turn=first;S.round=1;S.phase="production";S.setupComplete=true;ui.busy=false;log(`セットアップ完了。${S.players[first].name}から開始。`);render();
-  if(!window.NET?.online&&!player().human)setTimeout(cpuTurn,350);
+  if(window.NET?.online)scheduleOnlineCpuTurn(450);
+  else if(!player().human)setTimeout(cpuTurn,350);
 }
 async function placeSetupColony(p){
   B=buildBoardFromState();const avail=B.homes.flatMap(h=>h.sites).filter(id=>!buildingAt(id));if(!avail.length)return;
@@ -653,7 +654,7 @@ function renderPlayers(){
     const markers=Object.entries(S.friendshipMarkerHolder).filter(([k,v])=>v===p.id).map(([k])=>OUTPOSTS[k].icon).join("");
     const tradeable=i!==mySeat()&&isMyTurn()&&S.phase==="build"&&!ui.busy;
     return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""} ${tradeable?"tradeable":""}" data-player-card="${i}">
-      <div class="player-top"><span class="player-name" style="color:${p.color}">${p.name}${i===mySeat()?'<span class="badge">YOU</span>':""}</span><div class="vp-stack"><span class="vp">${p.vp} VP</span><span class="fame-vp">🏅 名声片 ${p.famePieces}（${Math.floor(p.famePieces/2)}VP）${p.permanentMedals?`　◆特殊VP ${p.permanentMedals}`:""}</span></div></div>
+      <div class="player-top"><span class="player-name" style="color:${p.color}">${p.name}${i===mySeat()?'<span class="badge">YOU</span>':""}${!p.human?'<span class="badge cpu-player-badge">CPU</span>':""}</span><div class="vp-stack"><span class="vp">${p.vp} VP</span><span class="fame-vp">🏅 名声片 ${p.famePieces}（${Math.floor(p.famePieces/2)}VP）${p.permanentMedals?`　◆特殊VP ${p.permanentMedals}`:""}</span></div></div>
       <div class="player-mini">資源 ${resTotal(p)} / ▲${p.ships.filter(s=>s.type==="colony").length} ■${p.ships.filter(s=>s.type==="trade").length} / 植民地系 ${p.colonies.length} / 宇宙港 ${p.spaceports.length}</div>
       <div class="player-mini">動力 ${totalSpeedBonus(p)} / 大砲 ${totalCombatBonus(p)} / 貨物 ${p.upgrades.freight}　${markers}</div>
     </div>`
@@ -949,8 +950,8 @@ function renderActions(){
   if(S.winner!==null){a.innerHTML='<div class="action-main">ゲーム終了</div>';return}
   if(ui.boardChoice){a.innerHTML=`<div class="setup-action-title">${ui.boardChoice.title}</div><div class="action-main">${ui.boardChoice.message}</div><div class="setup-help">盤面上の光っている場所をクリックしてください。</div>`;return}
   if(ui.setupOptions){a.innerHTML=`<div class="setup-action-title">${ui.setupOptions.title}</div><div class="action-main">${ui.setupOptions.message}</div><div class="setup-option-grid">${ui.setupOptions.options.map((o,i)=>`<button data-setup-option="${i}" class="${o.primary?"primary":""}">${o.label}</button>`).join("")}</div>`;a.querySelectorAll("[data-setup-option]").forEach(btn=>btn.onclick=()=>resolveSetupOption(ui.setupOptions.options[Number(btn.dataset.setupOption)].value));return}
+  if(!p.human){a.innerHTML=`<div class="action-main">${p.name} が行動しています…</div>`;return}
   if(window.NET?.online&&!isLocalPlayer(p)){a.innerHTML=`<div class="action-main">${p.name} の操作を待っています…</div>`;return}
-  if(!p.human){a.innerHTML='<div class="action-main">CPUが行動しています…</div>';return}
   if(pendingFreeTradeShipBlocks(p)){
     a.innerHTML=`<div class="setup-action-title">無料交易船を即時配置</div><div class="action-main"><span class="warn">無料交易船を置ける状態になりました。</span><br>公式ルール上、最初に配置可能になった機会で必ず置くため、ほかの操作は配置完了まで保留されます。</div><div class="action-buttons"><button id="freeTradeShipBtn" class="primary">■ 無料交易船 (${p.pendingFreeTradeShips})</button></div>`;
     $("freeTradeShipBtn").onclick=placePendingFreeTradeShipHuman;return;
@@ -1914,6 +1915,31 @@ async function cpuFlightPhase(p){
     await tryPlacePendingFreeTradeShips(p,false);
   }
 }
+let onlineCpuTimer=null;
+function canDriveOnlineCpu(){
+  return !!(window.NET?.online&&window.NET.connected&&window.NET.isHost?.()&&S&&S.setupComplete&&S.winner===null&&player()&&!player().human&&!ui.busy);
+}
+function scheduleOnlineCpuTurn(delay=420){
+  if(!window.NET?.online)return;
+  clearTimeout(onlineCpuTimer);onlineCpuTimer=null;
+  if(!canDriveOnlineCpu())return;
+  const turn=S.turn,round=S.round;
+  onlineCpuTimer=setTimeout(async()=>{
+    onlineCpuTimer=null;
+    if(!canDriveOnlineCpu()||S.turn!==turn||S.round!==round)return;
+    const was=window.NET.coordinatorMode;window.NET.coordinatorMode=true;
+    try{
+      await cpuTurn();
+      await window.NET.flushState(S);
+    }catch(err){
+      console.error("online CPU driver error",err);
+    }finally{
+      window.NET.coordinatorMode=was;
+      scheduleOnlineCpuTurn(500);
+    }
+  },delay);
+}
+
 async function cpuTurn(){
   if(S.winner!==null)return;const p=player();if(p.human)return;
   if(p.vp>=15){S.winner=p.id;winModal(p);return}
@@ -1936,11 +1962,12 @@ function nextTurn(){
   S.dice=null;S.lastDiceActor=null;
   S.turn=(S.turn+1)%S.count;if(S.turn===S.setupStarting)S.round++;resetTurnFlags(player());
   if(window.NET?.online){
-    window.NET.coordinatorMode=true;render();
-    window.NET.flushState(S).finally(()=>{window.NET.coordinatorMode=false});
+    const was=window.NET.coordinatorMode;window.NET.coordinatorMode=true;render();
+    window.NET.flushState(S).finally(()=>{window.NET.coordinatorMode=was;scheduleOnlineCpuTurn(450)});
   }else render();
   if(player().vp>=15){S.winner=player().id;winModal(player());return}
-  if(!window.NET?.online&&!player().human)setTimeout(cpuTurn,350);
+  if(window.NET?.online)scheduleOnlineCpuTurn(500);
+  else if(!player().human)setTimeout(cpuTurn,350);
 }
 
 function showToast(msg){return modalPromise(`<h2>確認</h2><p>${msg}</p>`,[{label:"OK",value:true,primary:true}])}
@@ -2022,26 +2049,29 @@ async function handleOnlineChoiceRequest(req){
   return null;
 }
 
-async function hostStartOnline(names,setupMode){
+async function hostStartOnline(roster,setupMode){
   if(!window.NET?.online)throw new Error("オンライン接続がありません");
-  if(!Array.isArray(names)||(names.length!==3&&names.length!==4))throw new Error("3人または4人で開始してください");
-  newGame(names[0],names.length,setupMode||"beginner");
-  S.players.forEach((p,i)=>{p.name=names[i]||`Player ${i+1}`;p.human=true});
+  if(!Array.isArray(roster)||(roster.length!==3&&roster.length!==4))throw new Error("人間＋CPUの合計を3人または4人にしてください");
+  const names=roster.map((x,i)=>x?.name||`Player ${i+1}`);
+  newGame(names[0],roster.length,setupMode||"beginner");
+  S.players.forEach((p,i)=>{p.name=names[i];p.human=!roster[i]?.cpu;p.cpu=!!roster[i]?.cpu});
   if(Array.isArray(S.logs))for(const entry of S.logs)for(let i=1;i<names.length;i++)entry.msg=entry.msg.replaceAll(`CPU ${i}`,names[i]);
-  S.onlineRoom=window.NET.room;S.online=true;
+  S.onlineRoom=window.NET.room;S.online=true;S.onlineRoster=clone(roster);
   B=buildBoardFromState();showScreen("gameScreen");render();
   if($("onlineRoomBadge"))$("onlineRoomBadge").textContent=`ROOM ${window.NET.room} / P${mySeat()+1}`;
   await window.NET.startGame(clone(S));
   await window.NET.flushState(S);
   if(!S.setupComplete){await runAdvancedSetup();await window.NET.flushState(S)}
+  scheduleOnlineCpuTurn(500);
   return true;
 }
 
 function receiveOnlineState(state){
   if(!state)return;
-  S=clone(state);S.players?.forEach(p=>p.human=true);B=buildBoardFromState();
+  S=clone(state);B=buildBoardFromState();
   showScreen("gameScreen");render();
   if($("onlineRoomBadge"))$("onlineRoomBadge").textContent=`ROOM ${window.NET?.room||"-"} / P${mySeat()+1}`;
+  scheduleOnlineCpuTurn(420);
 }
 
 async function playNetEvent(event){
@@ -2066,6 +2096,7 @@ window.SFOnlineAPI={
   hostStart:hostStartOnline,
   handleChoiceRequest:handleOnlineChoiceRequest,
   playNetEvent,
+  maybeDriveCpu:()=>scheduleOnlineCpuTurn(250),
   getState:()=>S?clone(S):null
 };
 window.dispatchEvent(new Event("starfarers-api-ready"));

@@ -31,6 +31,7 @@ const NET = window.NET = {
   lastSentJson: "",
   isLocalPlayer(p){ return !!p && Number(p.id) === Number(this.seat); },
   mySeat(){ return Number.isInteger(this.seat) ? this.seat : 0; },
+  isHost(){ return Number(this.seat) === Number(this.hostSeat); },
   canPublishState(state){
     if(!this.connected || !state) return false;
     if(this.coordinatorMode) return true;
@@ -76,7 +77,9 @@ const NET = window.NET = {
     if(!room) return;
     const res = await fetch(`${base}/api/room/${encodeURIComponent(room)}/reset`,{method:"POST"});
     if(!res.ok) throw new Error(`reset ${res.status}`);
-  }
+  },
+  addCpu(){ this.send({type:"add_cpu"}); },
+  removeCpu(seat){ this.send({type:"remove_cpu",seat:Number(seat)}); }
 };
 
 function validServer(){ return /^https?:\/\//.test(base) && !base.includes("YOUR-WORKER"); }
@@ -100,7 +103,7 @@ function renderRooms(rooms){
     const s=map.get(id)||{occupied:0,connected:0,started:false};
     const full=s.occupied>=4;
     return `<div class="room-card ${s.started?"started":""} ${full?"full":""}">
-      <div><div class="room-name">ROOM ${id}</div><div class="room-meta">${s.started?"ゲーム中":"待機中"} / 接続 ${s.connected||0}人 / 席 ${s.occupied||0}/4</div></div>
+      <div><div class="room-name">ROOM ${id}</div><div class="room-meta">${s.started?"ゲーム中":"待機中"} / 人間 ${s.connected||0} / CPU ${s.cpus||0} / 席 ${s.occupied||0}/4</div></div>
       <div class="room-actions"><button data-join-room="${id}" ${full&&!s.started?"disabled":""}>参加</button><button data-reset-room="${id}" class="danger">初期化</button></div>
     </div>`;
   }).join("");
@@ -152,7 +155,7 @@ function handleMessage(msg){
     return;
   }
   if(msg.type==="lobby"){
-    NET.lobby=msg.snapshot;NET.hostSeat=Number(msg.snapshot?.hostSeat ?? NET.hostSeat);showLobby(msg.snapshot);return;
+    NET.lobby=msg.snapshot;NET.hostSeat=Number(msg.snapshot?.hostSeat ?? NET.hostSeat);showLobby(msg.snapshot);window.SFOnlineAPI?.maybeDriveCpu?.();return;
   }
   if(msg.type==="start_ack"){
     const p=NET._startPending;if(p){clearTimeout(p.timer);NET._startPending=null;p.resolve(true)}return;
@@ -196,9 +199,22 @@ function showLobby(snapshot){
   if($("roomSelectCard"))$("roomSelectCard").style.display="none";
   $("lobbyCard").style.display="block";$("lobbyRoomName").textContent=`ROOM ${NET.room}`;
   const seats=snapshot.seats||[];
-  $("lobbyPlayers").innerHTML=[0,1,2,3].map(i=>{const s=seats.find(x=>x.seat===i);return `<div class="lobby-player"><span class="seat" style="color:${["#ffd34e","#ff5f68","#f0f0f0","#4ca9ff"][i]}">P${i+1}　${s?esc(s.name):"空席"}</span><span>${s?(s.connected?"接続中":"切断"):("待機")}${i===snapshot.hostSeat?'<span class="host">HOST</span>':""}</span></div>`}).join("");
-  const isHost=Number(NET.seat)===Number(snapshot.hostSeat);$("hostControls").style.display=isHost?"block":"none";$("guestWaiting").style.display=isHost?"none":"block";
+  const isHost=Number(NET.seat)===Number(snapshot.hostSeat);
+  $("lobbyPlayers").innerHTML=[0,1,2,3].map(i=>{
+    const s=seats.find(x=>x.seat===i);
+    const status=!s?"待機":s.cpu?"CPU":(s.connected?"接続中":"切断");
+    const cpuRemove=isHost&&s?.cpu?`<button class="cpu-remove-btn" data-remove-cpu="${i}">削除</button>`:"";
+    return `<div class="lobby-player ${s?.cpu?"cpu-seat":""}">
+      <span class="seat" style="color:${["#ffd34e","#ff5f68","#f0f0f0","#4ca9ff"][i]}">P${i+1}　${s?esc(s.name):"空席"}${s?.cpu?'<span class="cpu-badge">CPU</span>':""}</span>
+      <span class="lobby-seat-status">${status}${i===snapshot.hostSeat?'<span class="host">HOST</span>':""}${cpuRemove}</span>
+    </div>`;
+  }).join("");
+  $("lobbyPlayers").querySelectorAll("[data-remove-cpu]").forEach(b=>b.onclick=()=>NET.removeCpu(b.dataset.removeCpu));
+  $("hostControls").style.display=isHost?"block":"none";$("guestWaiting").style.display=isHost?"none":"block";
   if(isHost && snapshot.config?.setupMode)$("setupMode").value=snapshot.config.setupMode;
+  const active=seats.filter(s=>s.cpu||s.connected);
+  if($("addCpuBtn"))$("addCpuBtn").disabled=!isHost||seats.length>=4;
+  if($("lobbyCountNote"))$("lobbyCountNote").textContent=`現在 ${active.length}/4人（人間 ${active.filter(s=>!s.cpu).length} / CPU ${active.filter(s=>s.cpu).length}）`;
 }
 function showTitleOnly(){
   intentionalClose=true;try{NET.socket?.close()}catch(e){}NET.socket=null;NET.connected=false;NET.room=null;NET.seat=null;NET.lobby=null;lastJoin=null;
@@ -207,12 +223,13 @@ function showTitleOnly(){
 
 async function hostStart(){
   const snap=NET.lobby; if(!snap)return;
-  const connected=(snap.seats||[]).filter(s=>s.connected).sort((a,b)=>a.seat-b.seat);
-  if(connected.length<3||connected.length>4){alert("ゲーム開始には3人または4人の接続が必要です。");return;}
+  const roster=(snap.seats||[]).filter(s=>s.cpu||s.connected).sort((a,b)=>a.seat-b.seat);
+  if(roster.length<3||roster.length>4){alert("人間＋CPUの合計を3人または4人にしてください。");return;}
+  if(roster.some((s,i)=>Number(s.seat)!==i)){alert("席に空きがあります。CPUを追加するか、空席を埋めてください。");return;}
   if(!window.SFOnlineAPI?.hostStart){alert("ゲーム読込中です。もう一度押してください。");return;}
-  const names=connected.map(s=>s.name),setup=$("setupMode").value;
+  const players=roster.map(s=>({seat:Number(s.seat),name:s.name,cpu:!!s.cpu})),setup=$("setupMode").value;
   NET.coordinatorMode=true;
-  try{await window.SFOnlineAPI.hostStart(names,setup)}catch(e){console.error(e);alert(`開始処理でエラー: ${e.message}`)}finally{NET.coordinatorMode=false;}
+  try{await window.SFOnlineAPI.hostStart(players,setup)}catch(e){console.error(e);alert(`開始処理でエラー: ${e.message}`)}finally{NET.coordinatorMode=false;}
 }
 
 function leaveRoom(){ intentionalClose=true;NET.send({type:"leave_room"});try{NET.socket?.close(1000,"leave")}catch(e){}showTitleOnly(); }
@@ -226,6 +243,7 @@ window.addEventListener("starfarers-api-ready",drainQueue);
 
 window.addEventListener("DOMContentLoaded",()=>{
   $("refreshRoomsBtn").onclick=refreshRooms;$("onlineStartBtn").onclick=hostStart;$("leaveRoomBtn").onclick=leaveRoom;
+  $("addCpuBtn").onclick=()=>NET.addCpu();
   $("setupMode").onchange=()=>NET.send({type:"lobby_config",config:{setupMode:$("setupMode").value}});
   refreshRooms();roomPoll=setInterval(()=>{if(!NET.room)refreshRooms()},5000);
 });

@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>宇宙開拓 ONLINE v3.0</title>
+  <title>宇宙開拓 ONLINE v3.1</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -12,7 +12,7 @@
     <div id="roomSelectCard" class="title-card online-title-card">
       <div class="eyebrow">PRIVATE ONLINE TABLETOP</div>
       <h1>宇宙開拓</h1>
-      <div class="subtitle">ONLINE v3.0 / Cloudflare Durable Objects</div>
+      <div class="subtitle">ONLINE v3.1 / Cloudflare Durable Objects</div>
       <label>あなたの名前
         <input id="playerName" maxlength="12" value="SABA">
       </label>
@@ -36,8 +36,12 @@
             <option value="wild">Wild Space</option>
           </select>
         </label>
+        <div class="lobby-cpu-actions">
+          <button id="addCpuBtn" class="cpu-add-btn">＋ CPU追加</button>
+          <span id="lobbyCountNote">人間＋CPUの合計3～4人で開始できます。</span>
+        </div>
         <button id="onlineStartBtn" class="primary big">ゲーム開始</button>
-        <div class="mini-note">3人または4人が接続していると開始できます。</div>
+        <div class="mini-note">CPUは空席に追加され、ホスト端末がCPU手番を処理して全員へ同期します。</div>
       </div>
       <div id="guestWaiting" class="lobby-waiting">ホストの開始を待っています。</div>
       <button id="leaveRoomBtn" class="ghost big">部屋を退出</button>
@@ -47,7 +51,7 @@
   <section id="gameScreen" class="screen">
     <header class="topbar">
       <div>
-        <div class="game-title">宇宙開拓 <span>ONLINE v3.0</span></div>
+        <div class="game-title">宇宙開拓 <span>ONLINE v3.1</span></div>
         <div id="turnLabel" class="turn-label"></div>
       </div>
       <div class="top-actions">

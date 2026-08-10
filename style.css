@@ -417,3 +417,14 @@ html,body,#app,.screen{width:100%;max-width:none}
 .remote-choice-wait{position:fixed;inset:auto 14px 14px auto;z-index:150;background:#081326;border:1px solid #355f8c;border-radius:12px;padding:10px 13px;color:#b9cee4;box-shadow:0 12px 35px #0008;font-size:11px}
 .net-reconnect-banner{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:160;padding:10px 16px;background:#3d1720;border:1px solid #ff7d86;border-radius:12px;color:#ffd4d7;font-weight:800}
 @media(max-width:900px){#titleScreen.active{align-items:start}.lobby-card{margin-left:0;margin-top:10px}.room-grid{grid-template-columns:1fr}}
+
+/* ONLINE v3.1 CPU lobby */
+.lobby-cpu-actions{display:flex;align-items:center;gap:10px;margin:10px 0}
+.lobby-cpu-actions button{flex:0 0 auto}
+#lobbyCountNote{font-size:11px;color:#9fb5cf;line-height:1.4}
+.cpu-add-btn{border-color:#4f7f61;background:#10251c;color:#9ff0bd;font-weight:800}
+.lobby-player.cpu-seat{border-color:#4f6178;background:#101827}
+.lobby-seat-status{display:flex;align-items:center;gap:6px}
+.cpu-badge{display:inline-block;margin-left:7px;padding:2px 6px;border-radius:10px;border:1px solid #6f86a0;color:#bdd2e8;font-size:9px;vertical-align:middle}
+.cpu-remove-btn{padding:4px 7px;font-size:10px;border-color:#7b4048;color:#ffbdc1;background:#2a1117}
+.cpu-player-badge{border-color:#6f86a0!important;color:#bdd2e8!important}

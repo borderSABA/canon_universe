@@ -1,11 +1,6 @@
-﻿GitHub公開用ファイル（Worker URL設定済み）
+﻿宇宙カタン ONLINE v3.1 GitHub公開用
 
-Worker:
-https://starfarers-online.naitoryo7110.workers.dev
+config.jsには既存Worker URLを設定済みです。
+このフォルダの中身をGitHubリポジトリ canon_universe のルートへ上書きしてください。
 
-1. このフォルダ内のファイルをGitHubリポジトリのルートへアップロードしてください。
-2. GitHubの Settings → Pages を開きます。
-3. Deploy from a branch / main / /(root) を選択して保存します。
-4. 公開されたGitHub Pages URLを開いて動作確認してください。
-
-※ config.js は設定済みなので 2_SET_WORKER_URL.bat の実行は不要です。
+CPU対応にはCloudflare Worker v3.1側も必要です。先にWorkerを再デプロイしてください。
