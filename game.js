@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2.1";
+const VERSION = "3.2.2";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -639,7 +639,7 @@ function phaseLabel(x){return x==="setup"?"初期配置":x==="production"?"生�
 function render(){
   if(!S)return;
   $("turnLabel").textContent=`第${S.round}巡 / ${player().name} / ${phaseLabel(S.phase)} / ${S.setupMode==="beginner"?"初心者用固定配置":S.setupMode==="strategic"?"Strategic":S.setupMode==="explorer"?"Explorer":"Wild Space"}`;
-  renderPlayers();renderResources();renderPhases();renderBoard();renderVictoryRoadmap();renderSupplyPanel();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderFriendship();renderPinControl();
+  renderPlayers();renderResources();renderPhases();renderBoard();renderVictoryRoadmap();renderSupplyPanel();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderPinControl();
   save();
 }
 function renderDiceStatus(){
@@ -949,11 +949,7 @@ function boardHint(){
 }
 function renderHomes(){}
 function renderLog(){$("log").innerHTML=S.logs.map(x=>`<div class="log-entry"><span>${x.t}</span> <strong>${x.msg}</strong></div>`).join("")}
-function renderFriendship(){
-  const p=me();
-  if(!p.friendship.length){$("friendshipPanel").innerHTML='<div class="trade-note">まだ友好カードはありません。</div>';return}
-  $("friendshipPanel").innerHTML=p.friendship.map(c=>`<div class="friend-card"><span class="civ">${OUTPOSTS[c.civ]?.name||""}</span><b>${c.name}</b>${c.desc}</div>`).join("");
-}
+function renderFriendship(){ /* 友好カードはプレイヤー欄クリックで確認 */ }
 function canPlacePendingFreeTradeShip(p){
   return !!p && (p.pendingFreeTradeShips||0)>0 && p.stock.transports>0 && p.stock.tradeStations>0 && freeLaunchSites(p).length>0;
 }
