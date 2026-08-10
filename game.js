@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.1-online";
+const VERSION = "3.2";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -236,9 +236,9 @@ async function showCenterNotice(text,sub=""){
   document.body.appendChild(el);await wait(1500);el.classList.add("hide");await wait(180);el.remove();
 }
 
-function chooseBoardNode(title,message,ids,confirmText="ここに置きますか？"){
+function chooseBoardNode(title,message,ids,confirmText="ここに置きますか？",style="node"){
   return new Promise(resolve=>{
-    ui.boardChoice={title,message,ids:[...ids],confirmText,resolve};
+    ui.boardChoice={title,message,ids:[...ids],confirmText,style,resolve};
     render();
   });
 }
@@ -274,40 +274,44 @@ function log(msg){
   if(S.logs.length>180)S.logs.length=180;
 }
 const resourceGainQueue=new Map();
-function announceResourceGain(p,gains,source=""){
+function resourceGainCount(gains){return R.reduce((n,r)=>n+(gains?.[r]||0),0)}
+function announceResourceGain(p,gains,source="",visibility="public",visibleTo=null){
   if(!p||!gains)return;
-  const items=R.filter(r=>(gains[r]||0)>0);if(!items.length)return;
+  if(!R.some(r=>(gains[r]||0)>0))return;
   let q=resourceGainQueue.get(p.id);
-  if(!q){
-    q={pid:p.id,name:p.name,color:p.color,gains:blankRes(),sources:new Set(),timer:null};
-    resourceGainQueue.set(p.id,q);
-  }
-  for(const r of R)q.gains[r]+=(gains[r]||0);
-  if(source)q.sources.add(source);
+  if(!q){q={pid:p.id,name:p.name,color:p.color,entries:[],timer:null};resourceGainQueue.set(p.id,q)}
+  q.entries.push({gains:clone(gains),source,visibility,visibleTo:visibility==="public"?null:new Set((visibleTo||[p.id]).map(Number))});
   clearTimeout(q.timer);
   q.timer=setTimeout(()=>{
     resourceGainQueue.delete(p.id);
-    const payload={pid:q.pid,name:q.name,color:q.color,items:R.filter(r=>q.gains[r]>0).map(r=>({r,n:q.gains[r]})),source:[...q.sources].join("＋")};
-    if(window.NET?.online&&!window.NET.playingNetEvent)window.NET.broadcastEvent({kind:"resource_gain",payload});
-    showResourceGainOverlay(payload);
+    const makePayload=(viewer)=>{
+      const exact=blankRes(),hidden=new Map();
+      for(const e of q.entries){
+        const canSee=e.visibility==="public"||e.visibleTo?.has(Number(viewer));
+        if(canSee){for(const r of R)exact[r]+=(e.gains[r]||0)}
+        else{const n=resourceGainCount(e.gains);if(n)hidden.set(e.source||"非公開資源",(hidden.get(e.source||"非公開資源")||0)+n)}
+      }
+      return {pid:q.pid,name:q.name,color:q.color,items:R.filter(r=>exact[r]>0).map(r=>({r,n:exact[r]})),hidden:[...hidden].map(([label,n])=>({label,n}))};
+    };
+    if(window.NET?.online&&!window.NET.playingNetEvent){
+      const seats=(S?.players||[]).filter(x=>x.human).map(x=>Number(x.id));
+      for(const seat of seats){
+        const payload=makePayload(seat);if(!payload.items.length&&!payload.hidden.length)continue;
+        if(seat===mySeat())showResourceGainOverlay(payload);else window.NET.sendEvent(seat,{kind:"resource_gain",payload});
+      }
+    }else showResourceGainOverlay(makePayload(mySeat()));
   },120);
 }
 function showResourceGainOverlay(payload){
   document.querySelectorAll(`.resource-gain-overlay[data-player="${payload.pid}"]`).forEach(e=>e.remove());
   const card=document.querySelector(`[data-player-card="${payload.pid}"]`);
   let left=115,top=110+payload.pid*78,width=225;
-  if(card){
-    const rect=card.getBoundingClientRect();
-    left=rect.left+rect.width/2;top=rect.top+rect.height*.52;
-    width=Math.max(215,Math.min(320,rect.width+25));
-  }
-  const pop=document.createElement("div");
-  pop.className="resource-gain-overlay";pop.dataset.player=String(payload.pid);
-  pop.style.left=`${left}px`;pop.style.top=`${top}px`;pop.style.width=`${width}px`;
-  pop.style.setProperty("--player-color",payload.color||"#7edcff");
-  pop.innerHTML=`<span class="resource-gain-name">${payload.name}　入手資源</span><span class="resource-gain-items">${payload.items.map(x=>`${RI[x.r]} ${RL[x.r]} +${x.n}`).join("　")}</span>`;
-  document.body.appendChild(pop);requestAnimationFrame(()=>pop.classList.add("show"));
-  setTimeout(()=>{pop.classList.remove("show");setTimeout(()=>pop.remove(),220)},2000);
+  if(card){const rect=card.getBoundingClientRect();left=rect.left+rect.width/2;top=rect.top+rect.height*.52;width=Math.max(215,Math.min(340,rect.width+30))}
+  const pop=document.createElement("div");pop.className="resource-gain-overlay";pop.dataset.player=String(payload.pid);
+  pop.style.left=`${left}px`;pop.style.top=`${top}px`;pop.style.width=`${width}px`;pop.style.setProperty("--player-color",payload.color||"#7edcff");
+  const exact=(payload.items||[]).map(x=>`${RI[x.r]} ${RL[x.r]} +${x.n}`),hidden=(payload.hidden||[]).map(x=>`${x.label} +${x.n}枚`);
+  pop.innerHTML=`<span class="resource-gain-name">${payload.name}　入手資源</span><span class="resource-gain-items">${[...exact,...hidden].join("　")}</span>`;
+  document.body.appendChild(pop);requestAnimationFrame(()=>pop.classList.add("show"));setTimeout(()=>{pop.classList.remove("show");setTimeout(()=>pop.remove(),220)},2000);
 }
 function oneGain(r,n=1){const g=blankRes();g[r]=n;return g}
 function save(){
@@ -586,7 +590,7 @@ function drawReserve(p,n=1){
     if(!S.reserve.length)break;
     const r=S.reserve.pop();p.res[r]++;gained[r]++;
   }
-  announceResourceGain(p,gained,"予備資源");
+  announceResourceGain(p,gained,"予備資源","private",[p.id]);
   return gained;
 }
 function refillReserve(){
@@ -635,7 +639,7 @@ function phaseLabel(x){return x==="setup"?"初期配置":x==="production"?"生�
 function render(){
   if(!S)return;
   $("turnLabel").textContent=`第${S.round}巡 / ${player().name} / ${phaseLabel(S.phase)} / ${S.setupMode==="beginner"?"初心者用固定配置":S.setupMode==="strategic"?"Strategic":S.setupMode==="explorer"?"Explorer":"Wild Space"}`;
-  renderPlayers();renderResources();renderPhases();renderBoard();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderFriendship();renderPinControl();
+  renderPlayers();renderResources();renderPhases();renderBoard();renderVictoryRoadmap();renderSupplyPanel();renderLog();renderActions();renderDiceStatus();renderMothershipRollStatus();renderBuild();renderBank();renderPlayerTrade();renderFriendship();renderPinControl();
   save();
 }
 function renderDiceStatus(){
@@ -652,22 +656,38 @@ function renderDiceStatus(){
 function renderPlayers(){
   $("playersPanel").innerHTML=`<div class="panel-title">プレイヤー</div>`+S.players.map((p,i)=>{
     const markers=Object.entries(S.friendshipMarkerHolder).filter(([k,v])=>v===p.id).map(([k])=>OUTPOSTS[k].icon).join("");
-    const tradeable=i!==mySeat()&&isMyTurn()&&S.phase==="build"&&!ui.busy;
-    return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""} ${tradeable?"tradeable":""}" data-player-card="${i}">
+    return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""}" data-player-card="${i}" title="クリックで所持友好カードを確認">
       <div class="player-top"><span class="player-name" style="color:${p.color}">${p.name}${i===mySeat()?'<span class="badge">YOU</span>':""}${!p.human?'<span class="badge cpu-player-badge">CPU</span>':""}</span><div class="vp-stack"><span class="vp">${p.vp} VP</span><span class="fame-vp">🏅 名声片 ${p.famePieces}（${Math.floor(p.famePieces/2)}VP）${p.permanentMedals?`　◆特殊VP ${p.permanentMedals}`:""}</span></div></div>
       <div class="player-mini">資源 ${resTotal(p)} / ▲${p.ships.filter(s=>s.type==="colony").length} ■${p.ships.filter(s=>s.type==="trade").length} / 植民地系 ${p.colonies.length} / 宇宙港 ${p.spaceports.length}</div>
-      <div class="player-mini">動力 ${totalSpeedBonus(p)} / 大砲 ${totalCombatBonus(p)} / 貨物 ${p.upgrades.freight}　${markers}</div>
+      <div class="player-mini">動力 ${totalSpeedBonus(p)} / 大砲 ${totalCombatBonus(p)} / 貨物 ${p.upgrades.freight} / <b>友好 ${p.friendship.length}</b>　${markers}</div>
     </div>`
   }).join("");
-  document.querySelectorAll("[data-player-card]").forEach(card=>{
-    const id=Number(card.dataset.playerCard);
-    if(id!==mySeat()&&isMyTurn()&&S.phase==="build"&&!ui.busy)card.onclick=()=>openCatanTrade(id);
-  });
+  document.querySelectorAll("[data-player-card]").forEach(card=>{const id=Number(card.dataset.playerCard);card.onclick=()=>showPlayerFriendship(S.players[id])});
+}
+function showPlayerFriendship(p){
+  const cards=p.friendship||[];
+  const body=cards.length?cards.map(c=>`<div class="friend-card player-friend-card"><span class="civ">${OUTPOSTS[c.civ]?.name||""}</span><b>${c.name}</b>${c.desc}</div>`).join(""):'<div class="trade-note">所持している友好カードはありません。</div>';
+  const markers=Object.entries(S.friendshipMarkerHolder).filter(([k,v])=>v===p.id).map(([k])=>`${OUTPOSTS[k].icon} ${OUTPOSTS[k].name}`).join(" / ");
+  modalPromise(`<h2>${p.name} の友好カード</h2>${markers?`<p class="friend-marker-line">友好マーカー：${markers}</p>`:""}<div class="player-friend-list">${body}</div>`,[{label:"閉じる",value:true,primary:true}]);
 }
 function renderResources(){
   const p=me();
   const marker=(p.tradeShipMarkersHeld||0)>0?`<div class="resource-row resource-marker-row"><div><div class="resource-name">■ 無料交易船マーカー</div><div class="marker-note">最初に配置可能になった機会で必ず無料交易船を置く</div></div><div class="resource-count">${p.tradeShipMarkersHeld}</div></div>`:"";
-  $("resourcePanel").innerHTML=R.map(r=>`<div class="resource-row"><div><div class="resource-name">${RI[r]} ${RL[r]}</div><div class="supply-mini">供給 ${S.supply[r]}</div></div><div class="resource-count">${p.res[r]}</div></div>`).join("")+marker;
+  $("resourcePanel").innerHTML=R.map(r=>`<div class="resource-row resource-tile resource-${r}"><div class="resource-name">${RI[r]} ${RL[r]}</div><div class="resource-count">${p.res[r]}</div></div>`).join("")+marker;
+}
+function renderVictoryRoadmap(){
+  const el=$("victoryRoadmap");if(!el)return;const cells=[];
+  for(let vp=4;vp<=15;vp++){
+    const here=S.players.filter(p=>p.vp===vp);let bg="";
+    if(here.length===1)bg=here[0].color;else if(here.length>1){const step=100/here.length;bg=`conic-gradient(${here.map((p,i)=>`${p.color} ${(i*step).toFixed(3)}% ${((i+1)*step).toFixed(3)}%`).join(",")})`}
+    const reserve=vp<=7?2:vp<=9?1:0;
+    cells.push(`<div class="vp-road-cell reserve-${reserve}" style="${bg?`--vp-fill:${bg}`:""}"><div class="vp-road-fill"></div><div class="vp-road-number">${vp}</div><div class="vp-road-reserve">${reserve?`予備 +${reserve}`:"予備なし"}</div>${here.length?`<div class="vp-road-names">${here.map(p=>p.name).join("・")}</div>`:""}</div>`);
+  }
+  el.innerHTML=cells.join("");
+}
+function renderSupplyPanel(){
+  const el=$("supplyPanel");if(!el)return;
+  el.innerHTML=R.map(r=>`<div class="supply-tile resource-${r}"><span>${RI[r]} ${RL[r]}</span><b>${S.supply[r]}</b></div>`).join("")+`<div class="supply-tile reserve-stack"><span>？ 予備資源</span><b>${S.reserve.length}</b><small>中身は非公開</small></div>`;
 }
 function renderStock(){
   if(!$("stockPanel"))return;
@@ -867,21 +887,22 @@ function drawShips(b){
     let piece;
     const humanClass=isLocalPlayer(p)?" ship-human":"";
     const movableClass=movable?" ship-movable":"";
-    if(sh.type==="colony")piece=svg("polygon",{points:`${cx},${cy-12} ${cx-10},${cy+6} ${cx+10},${cy+6}`,fill:p.color,class:"ship-shape colony-ship"+humanClass+movableClass});
-    else piece=svg("rect",{x:cx-9,y:cy-9,width:18,height:18,rx:2,fill:p.color,class:"ship-shape trade-ship"+humanClass+movableClass});
+    const forcedChoiceClass=ui.boardChoice?.style==="ship"&&ui.boardChoice.ids.includes(sh.node)?" ship-forced-choice":"";
+    if(sh.type==="colony")piece=svg("polygon",{points:`${cx},${cy-12} ${cx-10},${cy+6} ${cx+10},${cy+6}`,fill:p.color,class:"ship-shape colony-ship"+humanClass+movableClass+forcedChoiceClass});
+    else piece=svg("rect",{x:cx-9,y:cy-9,width:18,height:18,rx:2,fill:p.color,class:"ship-shape trade-ship"+humanClass+movableClass+forcedChoiceClass});
     const title=svg("title");title.textContent=`${p.name} / ${sh.type==="colony"?"植民船":"交易船"}${movable?" / 移動可能":""}`;piece.append(title);
     if(isLocalPlayer(p)&&isMyTurn()&&S.phase==="flight"&&S.speed!==null&&!ui.busy&&!pendingFreeTradeShipBlocks(p))piece.addEventListener("click",()=>selectShip(sh.id));
     b.append(piece);
   }
 }
 function drawSetupTargets(b){
-  if(!ui.boardChoice)return;
+  if(!ui.boardChoice)return;const style=ui.boardChoice.style||"node";
   for(const id of ui.boardChoice.ids){
     const n=getNode(id);if(!n)continue;
-    const outer=svg("circle",{cx:n.x,cy:n.y,r:19,class:"setup-target-ring"});
-    const hit=svg("circle",{cx:n.x,cy:n.y,r:22,class:"setup-target-hit"});
-    hit.addEventListener("click",()=>resolveBoardChoice(id));
-    b.append(outer);b.append(hit);
+    const cls=style==="ship"?"setup-target-ring ship-choice-target":style==="ship-build"?"setup-target-ring ship-build-target":"setup-target-ring";
+    const outer=svg("circle",{cx:n.x,cy:n.y,r:style==="ship"?31:style==="ship-build"?25:19,class:cls});
+    const hit=svg("circle",{cx:n.x,cy:n.y,r:style==="ship"?34:style==="ship-build"?29:22,class:"setup-target-hit"});
+    hit.addEventListener("click",()=>resolveBoardChoice(id));b.append(outer);b.append(hit);
   }
 }
 function drawMovementTargets(b){
@@ -1195,7 +1216,7 @@ async function humanDiscard(p,n){
   });
 }
 function discardRandomToSupply(p,n){for(let i=0;i<n;i++){const a=R.filter(r=>p.res[r]>0);if(!a.length)break;returnSupply(p,rnd(a),1)}}
-function stealRandom(to,from,n=1){const gained=blankRes();for(let i=0;i<n;i++){const a=R.filter(r=>from.res[r]>0);if(!a.length)break;const r=rnd(a);from.res[r]--;to.res[r]++;gained[r]++}announceResourceGain(to,gained,"資源獲得");return gained}
+function stealRandom(to,from,n=1){const gained=blankRes();for(let i=0;i<n;i++){const a=R.filter(r=>from.res[r]>0);if(!a.length)break;const r=rnd(a);from.res[r]--;to.res[r]++;gained[r]++}announceResourceGain(to,gained,"ランダム資源","private",[to.id,from.id]);return gained}
 function bestNeededResource(p){return [...R].sort((a,b)=>p.res[a]-p.res[b])[0]}
 
 function bankRate(p,give){
@@ -1214,22 +1235,21 @@ function bankTrade(){
 async function humanBuild(k){
   if(pendingFreeTradeShipBlocks(me()))return;
   const p=me();if(!canBuild(p,k)||ui.busy)return;ui.busy=true;
-  if(k==="spaceport"){
-    const cands=p.colonies.filter(c=>!p.spaceports.some(s=>s.node===c.node));
-    const chosenNode=await chooseBoardNode("宇宙港を建設","自分の植民地から宇宙港にする場所を選んでください。",cands.map(c=>c.node),"ここを宇宙港にしていいですか？");
-    const chosen=cands.find(c=>c.node===chosenNode);
-    payCost(p,BUILD.spaceport.cost);p.stock.shipyards--;p.spaceports.push(clone(chosen));addVP(p,1,"宇宙港へ拡張");
-    markBlockingShipsForNewSpaceport(p,chosen.node);ui.busy=false;render();return;
-  }
-  payCost(p,BUILD[k].cost);
-  if(["booster","cannon","freight"].includes(k)){
-    p.upgrades[k]++;S.upgradeSupply[k]--;log(`${p.name}：${BUILD[k].name}を増設`);ui.busy=false;render();return;
-  }
-  const type=k==="colonyShip"?"colony":"trade";
-  if(type==="colony")p.stock.colonies--;else p.stock.tradeStations--;p.stock.transports--;
-  const sites=freeLaunchSites(p),site=sites.length===1?sites[0]:await chooseBoardNode(`${BUILD[k].name}を建設`,`空いている宇宙港の発進地点を選んでください。`,sites,`ここから${BUILD[k].name}を出していいですか？`);
-  if(sites.length===1){const ok=await modalPromise(`<h2>${BUILD[k].name}</h2><p>${nodeLabel(site)}</p><p><b>ここから建設していいですか？</b></p>`,[{label:"はい",value:true,primary:true},{label:"やめる",value:false}]);if(!ok){for(const [r,n] of Object.entries(BUILD[k].cost)){p.res[r]+=n;S.supply[r]-=n}if(type==="colony")p.stock.colonies++;else p.stock.tradeStations++;p.stock.transports++;ui.busy=false;render();return}}
-  p.ships.push({id:"s"+(S.nextShipId++),type,node:site,moved:0,stopped:false,startedOnColonySite:false});log(`${p.name}：${BUILD[k].name}を建造`);ui.busy=false;render();
+  try{
+    if(k==="spaceport"){
+      const cands=p.colonies.filter(c=>!p.spaceports.some(s=>s.node===c.node));
+      const chosenNode=await chooseBoardNode("宇宙港を建設","自分の植民地から宇宙港にする場所を選んでください。",cands.map(c=>c.node),"ここを宇宙港にしていいですか？");
+      const chosen=cands.find(c=>c.node===chosenNode);if(!chosen)return;
+      payCost(p,BUILD.spaceport.cost);p.stock.shipyards--;p.spaceports.push(clone(chosen));addVP(p,1,"宇宙港へ拡張");markBlockingShipsForNewSpaceport(p,chosen.node);render();return;
+    }
+    if(["booster","cannon","freight"].includes(k)){
+      payCost(p,BUILD[k].cost);p.upgrades[k]++;S.upgradeSupply[k]--;log(`${p.name}：${BUILD[k].name}を増設`);await checkAdjacentSpecialUnlocks(p,true);render();return;
+    }
+    const type=k==="colonyShip"?"colony":"trade",sites=freeLaunchSites(p);if(!sites.length)return;
+    const site=await chooseBoardNode(`${BUILD[k].name}を建設`,`盤面上で光っている空き発進地点を選んでください。`,sites,`ここから${BUILD[k].name}を出していいですか？`,"ship-build");if(!site)return;
+    payCost(p,BUILD[k].cost);if(type==="colony")p.stock.colonies--;else p.stock.tradeStations--;p.stock.transports--;
+    p.ships.push({id:"s"+(S.nextShipId++),type,node:site,moved:0,stopped:false,startedOnColonySite:false});log(`${p.name}：${BUILD[k].name}を建造`);render();
+  }finally{ui.busy=false;render()}
 }
 function colonyLabel(c){return `${getSystem(c.system).name} / 拠点${c.slot+1}`}
 function freeLaunchSites(p){return spaceportSitesFor(p).filter(id=>!isOccupied(id))}
@@ -1398,6 +1418,18 @@ async function processArrival(p,sh,human){
   }}
   return {exploredSystem};
 }
+async function checkAdjacentSpecialUnlocks(p,human){
+  let clearedAny=false;
+  for(const sh of [...p.ships]){
+    const n=getNode(sh.node);if(!n)continue;
+    for(const ref of n.planetAdj||[]){
+      const sys=S.systems[ref.system],pl=sys?.planets?.[ref.planet];if(!pl||!pl.revealed||!pl.special||pl.cleared)continue;
+      const ok=pl.special.type==="pirate"?totalCombatBonus(p)>=pl.special.need:p.upgrades.freight>=pl.special.need;
+      if(ok){await clearSpecialPlanet(p,sys,ref.planet,human);clearedAny=true}
+    }
+  }
+  return clearedAny;
+}
 async function showSpecialPlanetDiscoveries(sys,discovererName,human=true){
   const specials=sys.planets.filter(pl=>pl.special&&!pl.cleared);
   for(const pl of specials){
@@ -1450,7 +1482,7 @@ async function establishTradeStation(p,sh,key,human){
 async function grantFriendshipCard(p,key,human){
   const pool=S.friendshipPools[key];if(!pool.length)return;
   let id;if(human){id=await modalPromise(`<h2>${OUTPOSTS[key].name}の友好カード</h2><p>残っているカードから1枚選びます。効果はすぐ有効です。</p>`,pool.map(c=>({label:`${c.name}：${c.desc}`,value:c.id})))}else id=cpuChooseFriendship(p,key,pool).id;
-  const ix=pool.findIndex(c=>c.id===id),card=pool.splice(ix,1)[0];card.civ=key;p.friendship.push(card);log(`${p.name}：友好カード「${card.name}」を獲得`);
+  const ix=pool.findIndex(c=>c.id===id),card=pool.splice(ix,1)[0];card.civ=key;p.friendship.push(card);log(`${p.name}：友好カード「${card.name}」を獲得`);await checkAdjacentSpecialUnlocks(p,human);
 }
 function cpuChooseFriendship(p,key,pool){
   if(key==="scientists")return [...pool].sort((a,b)=>(b.kind==="speed")-(a.kind==="speed"))[0];
@@ -1745,12 +1777,16 @@ async function opponentsGiveChosenResource(receiver,cpuEncounter=false){
 }
 async function freeUpgradeChoice(p,human){
   const av=["booster","cannon","freight"].filter(k=>S.upgradeSupply[k]>0&&p.upgrades[k]<(k==="freight"?5:6));if(!av.length)return;
-  const k=human?await modalPromise('<h2>無料強化</h2><p>追加する強化を選びます。</p>',av.map(x=>({label:BUILD[x].name,value:x}))):rnd(av);freeUpgrade(p,k);log(`${p.name}：無料で${BUILD[k].name}を追加`);
+  const k=human?await modalPromise('<h2>無料強化</h2><p>追加する強化を選びます。</p>',av.map(x=>({label:BUILD[x].name,value:x}))):rnd(av);freeUpgrade(p,k);log(`${p.name}：無料で${BUILD[k].name}を追加`);await checkAdjacentSpecialUnlocks(p,human);
 }
 async function stopOneShip(p,human){
-  const eligible=p.ships.filter(s=>!s.mustVacateSpaceport);if(!eligible.length)return;
-  const id=human?await modalPromise('<h2>船を1隻停止</h2><p>この飛行フェイズに動けない船を選びます。相手の新宇宙港を塞いでいる退避義務船は選べません。</p>',eligible.map(s=>({label:`${s.type==="colony"?"植民船":"交易船"} @ ${nodeLabel(s.node)}`,value:s.id}))):rnd(eligible).id;
-  const sh=p.ships.find(s=>s.id===id);if(sh)sh.stopped=true;
+  const eligible=p.ships.filter(s=>!s.mustVacateSpaceport);if(!eligible.length)return;let id;
+  if(human){const nodes=eligible.map(s=>s.node);let nodeId;
+    if(isLocalPlayer(p))nodeId=await chooseBoardNode("休ませる船を選択","この飛行フェイズに移動できなくなる船を、盤面上の強調表示から選んでください。",nodes,"この船を休ませますか？","ship");
+    else if(window.NET?.online)nodeId=await window.NET.requestChoice(p.id,{kind:"board",style:"ship",title:"休ませる船を選択",message:"この飛行フェイズに移動できなくなる船を、盤面上の強調表示から選んでください。",ids:nodes,confirmText:"この船を休ませますか？"});
+    id=eligible.find(s=>s.node===nodeId)?.id;
+  }else id=rnd(eligible).id;
+  const sh=p.ships.find(s=>s.id===id);if(sh){sh.stopped=true;log(`${p.name}：${sh.type==="colony"?"植民船":"交易船"}1隻がこの飛行フェイズ中は移動不可`)}
 }
 function grantSpaceJump(p){p.pendingJump=(p.pendingJump||0)+1;log(`${p.name}：スペースジャンプ権を獲得`)}
 async function awardFreeTradeShip(p,human){
@@ -1806,14 +1842,14 @@ function bfsPath(start,goal,forShip=null){
 function nearestPath(start,targets){
   let best=null;for(const t of targets){const p=bfsPath(start,t);if(p&&(!best||p.length<best.length))best=p}return best;
 }
-function cpuBuildOne(p,k){
+async function cpuBuildOne(p,k){
   if(!canBuild(p,k))return false;
   if(k==="spaceport"){
     const c=p.colonies.find(c=>!p.spaceports.some(s=>s.node===c.node));if(!c)return false;
     payCost(p,BUILD[k].cost);p.stock.shipyards--;p.spaceports.push(clone(c));addVP(p,1,"宇宙港へ拡張");markBlockingShipsForNewSpaceport(p,c.node);return true;
   }
   payCost(p,BUILD[k].cost);
-  if(["booster","cannon","freight"].includes(k)){p.upgrades[k]++;S.upgradeSupply[k]--;log(`${p.name}：${BUILD[k].name}を増設`);return true}
+  if(["booster","cannon","freight"].includes(k)){p.upgrades[k]++;S.upgradeSupply[k]--;log(`${p.name}：${BUILD[k].name}を増設`);await checkAdjacentSpecialUnlocks(p,false);return true}
   const sites=freeLaunchSites(p);if(!sites.length)return false;
   const type=k==="colonyShip"?"colony":"trade";if(type==="colony")p.stock.colonies--;else p.stock.tradeStations--;p.stock.transports--;
   p.ships.push({id:"s"+(S.nextShipId++),type,node:rnd(sites),moved:0,stopped:false,startedOnColonySite:false});log(`${p.name}：${BUILD[k].name}を建造`);return true;
@@ -1842,7 +1878,7 @@ async function cpuBuildPhase(p){
   if(p.stock.transports>0&&p.stock.colonies>0)plan.push("colonyShip");
   if(p.spaceports.length<2)plan.push("spaceport");
   let built=0;
-  for(const k of plan){if(built>=3)break;if(!canPay(p,BUILD[k].cost))cpuPrepareCost(p,BUILD[k].cost);if(cpuBuildOne(p,k))built++}
+  for(const k of plan){if(built>=3)break;if(!canPay(p,BUILD[k].cost))cpuPrepareCost(p,BUILD[k].cost);if(await cpuBuildOne(p,k))built++}
 }
 async function cpuUseJump(p){
   if((p.pendingJump||0)<=0||!p.ships.length)return false;
@@ -2037,7 +2073,7 @@ function chooseDiscardBundleUI(res,n,title="資源を捨てる"){
 
 async function handleOnlineChoiceRequest(req){
   const q=req?.payload||req||{};
-  if(q.kind==="board")return chooseBoardNode(q.title||"場所を選択",q.message||"盤面から選択してください。",q.ids||[],q.confirmText||"ここでいいですか？");
+  if(q.kind==="board")return chooseBoardNode(q.title||"場所を選択",q.message||"盤面から選択してください。",q.ids||[],q.confirmText||"ここでいいですか？",q.style||"node");
   if(q.kind==="discard")return chooseDiscardBundleUI(q.res||blankRes(),Number(q.count)||0,q.title||"資源を捨てる");
   if(q.kind==="trade"){
     const give=tradeBundleText(q.give||blankRes()),get=tradeBundleText(q.get||blankRes());

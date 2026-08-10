@@ -54,6 +54,8 @@ const NET = window.NET = {
   },
   send(obj){ if(this.socket && this.socket.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify(obj)); },
   broadcastEvent(event){ this.send({type:"relay", targetSeat:null, packet:{type:"game_event", event}}); },
+  sendEvent(targetSeat,event){ this.send({type:"relay", targetSeat:Number(targetSeat), packet:{type:"game_event", event}}); },
+  humanSeats(){ return (this.lobby?.seats||[]).filter(s=>!s.cpu).map(s=>Number(s.seat)); },
   sendPin(pin){ this.broadcastEvent({kind:"pin", ...pin}); },
   async requestChoice(targetSeat,payload){
     if(Number(targetSeat) === Number(this.seat)) return window.SFOnlineAPI?.handleChoiceRequest?.({requestId:"local",fromSeat:this.seat,payload});
