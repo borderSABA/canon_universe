@@ -451,3 +451,59 @@ html,body,#app,.screen{width:100%;max-width:none}
 .player-card{cursor:pointer}.player-card:hover{border-color:#5c86b5}.player-friend-list{display:grid;gap:7px}.player-friend-card{margin:0}.friend-marker-line{color:#ffd369}
 @media(max-width:1250px){.victory-roadmap{grid-template-columns:repeat(6,minmax(60px,1fr))}.supply-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:760px){.victory-roadmap{grid-template-columns:repeat(4,minmax(60px,1fr))}.supply-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* =========================================================
+   ONLINE v3.2.1: board-bottom split + player friendship stats
+   ========================================================= */
+.board-bottom-row{
+  display:grid;
+  grid-template-columns:minmax(0,1.72fr) minmax(300px,.88fr);
+  gap:5px;
+  margin-top:5px;
+  align-items:stretch;
+}
+.board-bottom-row .victory-roadmap-panel,
+.board-bottom-row .supply-panel{margin-top:0;min-width:0;height:100%}
+.board-bottom-row .supply-grid{grid-template-columns:repeat(2,minmax(0,1fr));height:100%;align-content:start}
+.board-bottom-row .victory-roadmap{grid-template-columns:repeat(12,minmax(42px,1fr))}
+
+.player-stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:4px;
+  margin-top:7px;
+}
+.player-stat-grid>span{
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  padding:5px 4px;
+  border:1px solid #2d4b70;
+  border-radius:8px;
+  background:#09162b;
+  white-space:nowrap;
+}
+.player-stat-grid small{font-size:9px;color:#91a8c3;font-weight:800}
+.player-stat-grid b{font-size:13px;color:#fff}
+.player-stat-grid .friend-stat{border-color:#8a67bd;background:#1a1230;cursor:pointer}
+.player-stat-grid .friend-stat small,.player-stat-grid .friend-stat b{color:#e5d1ff}
+.friendship-marker-mini{margin-top:5px;color:#ffd369}
+.players-side-panel .player-card{cursor:pointer}
+.players-side-panel .player-card:hover{box-shadow:0 0 0 1px #5e86b7 inset,0 0 15px #2c6ea533}
+
+@media(max-width:1450px) and (min-width:1101px){
+  .board-bottom-row{grid-template-columns:minmax(0,1.55fr) minmax(280px,.95fr)}
+  .board-bottom-row .victory-roadmap{grid-template-columns:repeat(6,minmax(52px,1fr))}
+}
+@media(max-width:1100px){
+  .board-bottom-row{grid-template-columns:1fr}
+  .board-bottom-row .victory-roadmap{grid-template-columns:repeat(6,minmax(58px,1fr))}
+  .board-bottom-row .supply-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .board-bottom-row .victory-roadmap{grid-template-columns:repeat(4,minmax(58px,1fr))}
+  .board-bottom-row .supply-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}

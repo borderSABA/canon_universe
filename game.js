@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2";
+const VERSION = "3.2.1";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -656,13 +656,22 @@ function renderDiceStatus(){
 function renderPlayers(){
   $("playersPanel").innerHTML=`<div class="panel-title">プレイヤー</div>`+S.players.map((p,i)=>{
     const markers=Object.entries(S.friendshipMarkerHolder).filter(([k,v])=>v===p.id).map(([k])=>OUTPOSTS[k].icon).join("");
-    return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""}" data-player-card="${i}" title="クリックで所持友好カードを確認">
+    return `<div class="player-card ${i===S.turn?"active":""} ${i===mySeat()?"me":""}" data-player-card="${i}" title="クリックで${p.name}の友好カードを確認">
       <div class="player-top"><span class="player-name" style="color:${p.color}">${p.name}${i===mySeat()?'<span class="badge">YOU</span>':""}${!p.human?'<span class="badge cpu-player-badge">CPU</span>':""}</span><div class="vp-stack"><span class="vp">${p.vp} VP</span><span class="fame-vp">🏅 名声片 ${p.famePieces}（${Math.floor(p.famePieces/2)}VP）${p.permanentMedals?`　◆特殊VP ${p.permanentMedals}`:""}</span></div></div>
       <div class="player-mini">資源 ${resTotal(p)} / ▲${p.ships.filter(s=>s.type==="colony").length} ■${p.ships.filter(s=>s.type==="trade").length} / 植民地系 ${p.colonies.length} / 宇宙港 ${p.spaceports.length}</div>
-      <div class="player-mini">動力 ${totalSpeedBonus(p)} / 大砲 ${totalCombatBonus(p)} / 貨物 ${p.upgrades.freight} / <b>友好 ${p.friendship.length}</b>　${markers}</div>
+      <div class="player-stat-grid">
+        <span><small>動力</small><b>${totalSpeedBonus(p)}</b></span>
+        <span><small>大砲</small><b>${totalCombatBonus(p)}</b></span>
+        <span><small>貨物</small><b>${p.upgrades.freight}</b></span>
+        <span class="friend-stat"><small>友好</small><b>${p.friendship.length}</b></span>
+      </div>
+      ${markers?`<div class="player-mini friendship-marker-mini">友好マーカー ${markers}</div>`:""}
     </div>`
   }).join("");
-  document.querySelectorAll("[data-player-card]").forEach(card=>{const id=Number(card.dataset.playerCard);card.onclick=()=>showPlayerFriendship(S.players[id])});
+  document.querySelectorAll("[data-player-card]").forEach(card=>{
+    const id=Number(card.dataset.playerCard);
+    card.onclick=()=>showPlayerFriendship(S.players[id]);
+  });
 }
 function showPlayerFriendship(p){
   const cards=p.friendship||[];
