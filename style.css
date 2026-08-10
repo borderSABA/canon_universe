@@ -686,3 +686,168 @@ html,body{height:100%;overflow:hidden}
 /* ONLINE v3.2.3: フェイズバー削除 */
 #gameScreen .phasebar{display:none!important}
 #gameScreen .center-panel{padding-top:0!important}
+
+
+/* =========================================================
+   ONLINE v3.2.4: 右サイド密度・文字サイズ再調整
+   ========================================================= */
+@media(min-width:1101px){
+  /* 現在状況の余白を減らし、建設・資源へ高さを回す */
+  #gameScreen .right-panel{
+    grid-template-rows:126px minmax(210px,1.34fr) minmax(126px,.78fr) minmax(106px,.72fr)!important;
+  }
+  #gameScreen .action-panel{
+    padding:4px 6px!important;
+  }
+  #gameScreen .action-panel .panel-title{
+    margin-bottom:2px!important;
+  }
+  #gameScreen .roll-docks{
+    margin-bottom:2px!important;
+  }
+  #gameScreen .roll-dock-card{
+    padding:3px 4px!important;
+  }
+  #gameScreen .die-face-fixed,#gameScreen .mother-ball{
+    width:31px!important;height:31px!important;flex-basis:31px!important;
+  }
+  #gameScreen .action-main{
+    margin:0!important;
+    line-height:1.22!important;
+  }
+  #gameScreen .action-buttons{
+    margin-top:2px!important;
+  }
+
+  /* 建設：文字を読みやすく */
+  #gameScreen .build-panel{
+    padding:7px 8px!important;
+  }
+  #gameScreen .build-panel .panel-title{
+    font-size:12px!important;
+    margin-bottom:5px!important;
+  }
+  #gameScreen .build-panel .build-grid{
+    height:calc(100% - 22px)!important;
+    gap:5px!important;
+  }
+  #gameScreen .build-panel .catan-build-btn{
+    padding:5px 7px!important;
+    grid-template-columns:31px minmax(0,1fr) 48px!important;
+  }
+  #gameScreen .build-panel .build-icon-wrap{
+    height:30px!important;
+    margin-right:5px!important;
+  }
+  #gameScreen .build-panel .build-copy strong{
+    font-size:11px!important;
+    line-height:1.15!important;
+  }
+  #gameScreen .build-panel .cost-chip{
+    font-size:9px!important;
+    padding:2px 4px!important;
+  }
+  #gameScreen .build-stock-badge{
+    font-size:11px!important;
+    min-width:44px!important;
+    padding:4px 3px!important;
+  }
+  #gameScreen .build-stock-sub{
+    font-size:8px!important;
+  }
+
+  /* 資源：タイル名・枚数とも拡大 */
+  #gameScreen .resource-panel{
+    padding:7px 8px!important;
+  }
+  #gameScreen .resource-panel .panel-title{
+    font-size:12px!important;
+    margin-bottom:5px!important;
+  }
+  #gameScreen .resource-panel .resources{
+    height:calc(100% - 22px)!important;
+    gap:5px!important;
+  }
+  #gameScreen .resource-panel .resource-row{
+    padding:6px 7px!important;
+  }
+  #gameScreen .resource-panel .resource-name{
+    font-size:11px!important;
+    font-weight:800!important;
+  }
+  #gameScreen .resource-panel .resource-count{
+    font-size:17px!important;
+  }
+  #gameScreen .resource-marker-row .marker-note{
+    font-size:8px!important;
+  }
+
+  /* プレイヤー欄を大きく、ログを低く */
+  #gameScreen .players-side-panel{
+    grid-template-rows:minmax(0,1fr) 112px!important;
+  }
+  #gameScreen .players-side-panel #playersPanel{
+    padding:8px!important;
+  }
+  #gameScreen .players-side-panel #playersPanel>.panel-title{
+    font-size:12px!important;
+    margin-bottom:6px!important;
+  }
+  #gameScreen .players-side-panel .player-card{
+    padding:8px 9px!important;
+    margin:5px 0!important;
+  }
+  #gameScreen .players-side-panel .player-name{
+    font-size:12px!important;
+  }
+  #gameScreen .players-side-panel .vp{
+    font-size:18px!important;
+  }
+  #gameScreen .players-side-panel .fame-vp{
+    font-size:8px!important;
+  }
+  #gameScreen .players-side-panel .player-mini{
+    font-size:9px!important;
+    line-height:1.32!important;
+    margin-top:3px!important;
+  }
+  #gameScreen .player-stat-grid>span{
+    padding:4px 3px!important;
+  }
+  #gameScreen .player-stat-grid small{
+    font-size:8px!important;
+  }
+  #gameScreen .player-stat-grid b{
+    font-size:12px!important;
+  }
+  #gameScreen .players-log-panel{
+    height:112px!important;
+    padding:5px 6px!important;
+  }
+  #gameScreen .players-log-panel .panel-title{
+    font-size:9px!important;
+    margin-bottom:3px!important;
+  }
+  #gameScreen .players-log-panel .log{
+    height:calc(100% - 15px)!important;
+    font-size:8px!important;
+  }
+}
+
+@media(max-height:820px) and (min-width:1101px){
+  #gameScreen .right-panel{
+    grid-template-rows:116px minmax(186px,1.3fr) minmax(112px,.76fr) minmax(96px,.7fr)!important;
+  }
+  #gameScreen .players-side-panel{
+    grid-template-rows:minmax(0,1fr) 96px!important;
+  }
+  #gameScreen .players-log-panel{height:96px!important}
+  #gameScreen .players-side-panel .player-card{
+    padding:6px 8px!important;
+    margin:3px 0!important;
+  }
+  #gameScreen .build-panel .build-copy strong{font-size:10px!important}
+  #gameScreen .build-panel .cost-chip{font-size:8px!important}
+  #gameScreen .resource-panel .resource-name{font-size:10px!important}
+  #gameScreen .resource-panel .resource-count{font-size:15px!important}
+}

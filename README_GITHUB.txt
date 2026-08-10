@@ -1,4 +1,4 @@
-﻿宇宙開拓 ONLINE v3.2.3.3 - GitHub Pages用
+﻿宇宙開拓 ONLINE v3.2.4.3 - GitHub Pages用
 
 Cloudflare Worker URL は設定済みです。
 https://starfarers-online.naitoryo7110.workers.dev
