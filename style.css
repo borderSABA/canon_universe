@@ -1,0 +1,419 @@
+*{box-sizing:border-box}
+:root{
+  --bg:#050814;--panel:#0d1428;--panel2:#111c36;--line:#284269;
+  --text:#ecf5ff;--muted:#93a7c4;--accent:#64d8ff;--gold:#ffd369;
+  --danger:#ff6b72;--ok:#63e6a5
+}
+html,body{margin:0;min-height:100%;background:
+ radial-gradient(circle at 20% 10%,#182a54 0,transparent 25%),
+ radial-gradient(circle at 80% 30%,#2c164e 0,transparent 22%),
+ radial-gradient(circle at 50% 80%,#0b3350 0,transparent 24%),var(--bg);
+ color:var(--text);font-family:"Yu Gothic UI","Meiryo",sans-serif}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.45;
+ background-image:radial-gradient(#fff 1px,transparent 1px);background-size:44px 44px}
+button,input,select{font:inherit}
+button{border:1px solid #36527e;background:#172748;color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer}
+button:hover:not(:disabled){filter:brightness(1.18);transform:translateY(-1px)}
+button:disabled{opacity:.35;cursor:not-allowed}
+button.primary{background:linear-gradient(180deg,#1ba8d2,#116b9a);border-color:#5ad9ff;font-weight:800}
+button.ghost{background:#0b1325}
+button.danger{border-color:#7b3641;color:#ffbdc1}
+button.big{width:100%;padding:14px;margin-top:10px}
+button.small{padding:7px 10px;font-size:12px}
+.screen{display:none;min-height:100vh}.screen.active{display:block}
+#titleScreen.active{display:grid;place-items:center;padding:24px}
+.title-card{width:min(520px,95vw);background:linear-gradient(180deg,rgba(18,31,59,.97),rgba(8,14,29,.97));
+ border:1px solid #315886;border-radius:26px;padding:34px;box-shadow:0 30px 80px #000a}
+.eyebrow{font-size:11px;letter-spacing:.2em;color:#7ddcff}.title-card h1{font-size:54px;margin:4px 0 0}
+.subtitle{color:#ffd369;font-weight:700;margin-bottom:18px}.lead{color:#bcd0ea;line-height:1.7}
+.title-card label{display:block;color:#a9bdd6;margin:14px 0 4px}
+.title-card input,.title-card select{width:100%;padding:12px;background:#080f20;color:white;border:1px solid #344b6d;border-radius:10px;margin-top:6px}
+.mini-note{font-size:11px;color:#7890ad;margin-top:14px;line-height:1.6}
+.topbar{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #1c3459;background:#070e1ee8;position:sticky;top:0;z-index:20}
+.game-title{font-weight:900;font-size:19px}.game-title span{font-size:11px;color:#83a6c5}.turn-label{font-size:12px;color:#ffd369;margin-top:3px}.top-actions{display:flex;gap:7px}
+.layout{display:grid;grid-template-columns:250px minmax(620px,1fr) 320px;gap:10px;padding:10px;max-width:1600px;margin:auto}
+.left-panel,.right-panel{display:flex;flex-direction:column;gap:10px}
+.panel{background:linear-gradient(180deg,rgba(16,27,52,.96),rgba(8,15,31,.96));border:1px solid #233d65;border-radius:14px;padding:11px;box-shadow:0 8px 25px #0004}
+.panel-title{font-size:12px;font-weight:800;letter-spacing:.08em;color:#8bdcff;margin-bottom:9px}
+.player-card{border:1px solid #284363;border-radius:11px;padding:8px;margin:6px 0;background:#0a1427}
+.player-card.active{outline:2px solid #ffd369;background:#18213a}
+.player-card.me{border-color:#4bb4dc}
+.player-top{display:flex;justify-content:space-between;align-items:center}.player-name{font-weight:800}.vp{font-size:18px;font-weight:900;color:#ffd369}
+.player-mini{font-size:11px;color:#a1b2cb;margin-top:4px}
+.resource-row{display:grid;grid-template-columns:1fr 40px;gap:8px;align-items:center;margin:5px 0;padding:7px 8px;background:#0a1427;border-radius:9px}
+.resource-name{font-size:12px}.resource-count{text-align:right;font-weight:900;font-size:16px}
+.mothership{text-align:center;padding:5px}.nose{color:#dce9f6}.ship-body{width:86px;margin:auto;border:2px solid #596f8b;border-radius:32px 32px 15px 15px;padding:4px;background:linear-gradient(#9aa7b3,#37475b)}
+.core{font-size:40px;filter:drop-shadow(0 4px 4px #000)}.pips,.boosters{display:flex;gap:3px;justify-content:center;min-height:8px;flex-wrap:wrap}.pip{width:8px;height:8px;border-radius:50%;background:#ffcf5c;border:1px solid #fff8}
+.pip.cannon{background:#7ed7ff}.pip.freight{background:#d59465}.pip.booster{background:#ffad47}.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;font-size:10px;text-align:center}.stat-grid b{display:block;font-size:17px;color:white}
+.speed-result{margin-top:8px;padding:8px;border-radius:9px;background:#081225;color:#a9bdd4;text-align:center;font-size:11px}
+.phasebar{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
+.phase-step{text-align:center;border:1px solid #274267;background:#0b1730;color:#7f94b1;padding:8px;border-radius:9px;font-size:12px;font-weight:800}
+.phase-step.active{color:#08111d;background:#ffd369;border-color:#fff0b4}
+.board-wrap{position:relative;border:1px solid #284a75;border-radius:18px;overflow:hidden;background:
+ radial-gradient(circle at 50% 50%,#13213f 0,#070c18 63%,#03060d 100%);min-height:560px}
+#spaceBoard{width:100%;display:block;min-height:560px}
+.board-hint{position:absolute;left:12px;bottom:10px;background:#050a14cc;border:1px solid #273e5f;border-radius:8px;padding:7px 9px;font-size:11px;color:#9fb2c9}
+.edge{stroke:#274a65;stroke-width:3}.node-dot{fill:#0c1a2c;stroke:#5ca6c7;stroke-width:2}.node-dot.reachable{fill:#143a4c;stroke:#7affdd;stroke-width:4;cursor:pointer}
+.node-dot.selected{fill:#ffd369;stroke:#fff}.system-ring{fill:#091428;stroke:#3d78a0;stroke-width:3}.system-ring.hidden{stroke-dasharray:6 6}
+.system-title{fill:#cce8ff;font-size:12px;text-anchor:middle;font-weight:800}.planet{stroke:#d5edff66;stroke-width:2}.planet-num{fill:#fff;font-weight:900;font-size:15px;text-anchor:middle;dominant-baseline:middle}
+.planet-hidden{fill:#121a2a;stroke:#7b8ba8;stroke-width:2}.planet-q{fill:#91a6c1;font-size:18px;text-anchor:middle;font-weight:900}
+.colony-pip{stroke:#fff;stroke-width:1}.ship-icon{font-size:20px;text-anchor:middle;dominant-baseline:middle;cursor:pointer}.ship-icon.selected{font-size:25px}
+.outpost{fill:#18294d;stroke:#b888ff;stroke-width:3}.outpost-title{fill:#e5d3ff;font-size:11px;text-anchor:middle;font-weight:800}
+.home-systems{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}.home-card{background:#081326;border:1px solid #244267;border-radius:11px;padding:7px;font-size:10px}
+.home-card b{display:block;color:#8bdcff}.home-planets{display:flex;gap:3px;margin-top:5px}.mini-planet{flex:1;border-radius:8px;padding:5px 2px;text-align:center;color:white;font-weight:800}
+.action-panel{min-height:150px}.action-main{font-size:12px;color:#c7d6e8;line-height:1.6}.action-buttons{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.build-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}.build-item{border:1px solid #2a4569;background:#0a152a;border-radius:9px;padding:7px}
+.build-item strong{display:block;font-size:11px}.cost{font-size:9px;color:#9eb2ca;margin:4px 0}
+.bank-row,.trade-row{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-bottom:6px}.panel select,.panel input{width:100%;background:#071022;color:white;border:1px solid #2f486d;border-radius:8px;padding:7px;font-size:11px}
+.trade-note{font-size:10px;color:#8196af;line-height:1.5}.log-panel{margin-top:8px}.log{max-height:150px;overflow:auto;font-size:11px;color:#aebfd2;line-height:1.6}.log-entry{border-bottom:1px solid #152640;padding:3px 0}.log-entry strong{color:#dbe9f8}
+.modal-backdrop{position:fixed;inset:0;background:#000a;display:none;place-items:center;z-index:100;padding:20px}.modal-backdrop.show{display:grid}
+.modal{width:min(560px,94vw);max-height:85vh;overflow:auto;background:#0b1429;border:1px solid #3f638f;border-radius:18px;padding:20px;box-shadow:0 30px 90px #000}
+.modal h2{margin-top:0}.modal p{color:#b4c6dc;line-height:1.7}.modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px}
+.choice-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.choice-grid button{min-height:50px}
+.dice{display:flex;gap:10px;justify-content:center;font-size:34px;margin:8px 0}.good{color:#6ff0b3}.warn{color:#ffd369}.bad{color:#ff868d}
+.badge{display:inline-block;border:1px solid #365274;border-radius:12px;padding:2px 6px;font-size:9px;color:#a9c6e4;margin-left:4px}
+@media(max-width:1100px){
+ .layout{grid-template-columns:210px minmax(520px,1fr)}.right-panel{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,1fr)}.right-panel .action-panel{grid-row:span 2}
+}
+@media(max-width:760px){
+ body{overflow:auto}.topbar{height:auto;padding:8px}.game-title{font-size:16px}.top-actions{gap:4px}.top-actions button{font-size:10px}
+ .layout{display:block;padding:6px}.left-panel{display:grid;grid-template-columns:1fr 1fr;gap:6px}.left-panel #playersPanel{grid-column:1/-1}
+ .panel{padding:8px}.center-panel{margin-top:6px}.right-panel{display:block}.right-panel .panel{margin-top:6px}
+ .board-wrap{min-height:430px;overflow:auto}#spaceBoard{min-width:720px;min-height:480px}.home-systems{grid-template-columns:1fr 1fr}
+ .player-card{display:inline-block;width:calc(50% - 5px);vertical-align:top}.mothership-panel{min-width:0}
+}
+
+.stock-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}.stock-item{background:#09152a;border:1px solid #263f64;border-radius:8px;padding:6px;font-size:10px;text-align:center}.stock-item b{display:block;font-size:16px;color:#fff}
+.friend-card{border:1px solid #35506e;background:#09152a;border-radius:9px;padding:7px;margin:6px 0;font-size:10px;line-height:1.45}.friend-card b{display:block;color:#ffd369;font-size:11px}.friend-card .civ{color:#78cfff;font-size:9px}.friend-card.used{opacity:.55}
+.friend-marker{display:inline-block;padding:2px 6px;border-radius:10px;background:#533d13;color:#ffe39b;font-size:9px;margin-left:4px}
+.supply-mini{font-size:9px;color:#7690ad;margin-top:3px}.sector-hex{fill:#07101e;stroke:#254e71;stroke-width:2}.sector-hex.unrevealed{fill:#10182b;stroke:#7794ab;stroke-dasharray:7 5}.sector-label{fill:#6f8eab;font-size:9px;text-anchor:middle}.system-orbit{fill:none;stroke:#407da4;stroke-width:2}.planet-token{stroke:#d9f1ff99;stroke-width:1.5}.site-dot{fill:#081525;stroke:#6ca6c7;stroke-width:2}.site-dot.blocked{fill:#4c2930;stroke:#ff7c83}.dock-line{stroke:#805bb2;stroke-width:2}.docking{fill:#251735;stroke:#bb8aff;stroke-width:3}.home-link{stroke:#3b5e7a;stroke-width:3}.launch-site{fill:#13223b;stroke:#8bdcff;stroke-width:2}.occupied-ring{fill:none;stroke:#fff;stroke-width:2}.ship-human{filter:drop-shadow(0 0 6px #fff7)}
+.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%) translateY(20px);background:#061020ed;border:1px solid #41709b;border-radius:10px;padding:10px 16px;color:#eaf7ff;opacity:0;pointer-events:none;transition:.2s;z-index:200;font-size:12px}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.resource-choice{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}.resource-choice button{padding:12px 4px}.discard-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}.discard-grid button{padding:10px 3px}.counter{font-size:22px;font-weight:900;color:#ffd369;text-align:center;margin:10px}.encounter-no{font-size:11px;color:#84a5c8;letter-spacing:.15em}.encounter-box{border:1px solid #315272;background:#071427;border-radius:12px;padding:12px;margin:10px 0}.encounter-title{font-size:19px;font-weight:900;color:#ffd369}.encounter-result{border-left:3px solid #67d4ff;padding-left:10px;margin-top:10px}.rule-list{font-size:12px;line-height:1.7;color:#b9cbe0}.rule-list b{color:#fff}.status-ok{color:#63e6a5}.status-note{color:#ffd369}
+@media(max-width:760px){.stock-grid{grid-template-columns:repeat(4,1fr)}.resource-choice,.discard-grid{grid-template-columns:repeat(3,1fr)}}
+.setup-lock{margin-top:14px;padding:10px 12px;border:1px solid #29476f;border-radius:10px;background:#09152a;color:#b8cbe2;font-size:12px}
+
+.space-route{stroke:#29526d;stroke-width:2.2;opacity:.72;pointer-events:none}
+.nebula-zone{fill:#4f8fba12;stroke:#d4b74455;stroke-width:3;stroke-dasharray:10 7;pointer-events:none}
+.sector-lobe{stroke:#7892aa;stroke-width:2;fill:#07101fdd}.sector-lobe.unknown{fill:#172239;stroke:#8598b6;stroke-dasharray:6 4}.sector-lobe.empty{fill:#09142199}.outpost-lobe{fill:#191631cc;stroke:#9d7bc4}
+.home-center-label{fill:#fff;text-anchor:middle;font-size:15px;font-weight:900}.home-planet{stroke-width:3}
+@media(max-width:760px){#spaceBoard{min-width:920px}}
+
+
+/* =========================================================
+   v2.1 ノーマルカタン共通操作UI
+   ========================================================= */
+.ship-legend{position:absolute;right:12px;bottom:10px;display:flex;gap:12px;align-items:center;background:#050a14d9;border:1px solid #273e5f;border-radius:9px;padding:7px 10px;font-size:11px;color:#dce9f8;z-index:4}
+.ship-legend span{display:flex;gap:6px;align-items:center}.legend-triangle{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:14px solid #fff;display:inline-block}.legend-square{width:13px;height:13px;background:#fff;display:inline-block;border-radius:2px}
+.ship-shape{stroke:#07111d;stroke-width:3;paint-order:stroke;filter:drop-shadow(0 2px 2px #000b);cursor:default}.ship-shape.ship-human{cursor:pointer}.ship-shape.ship-human:hover{stroke:#fff;stroke-width:4}.ship-select-ring{fill:#ffffff18;stroke:#fff;stroke-width:3;filter:drop-shadow(0 0 8px #fff)}
+.setup-target-ring{fill:#52e7bd25;stroke:#7affd9;stroke-width:4;filter:drop-shadow(0 0 7px #50e5c4);pointer-events:none;animation:setupPulse .85s ease-in-out infinite alternate}.setup-target-hit{fill:#fff0;stroke:none;cursor:pointer}.setup-target-hit:hover{fill:#fff2}
+@keyframes setupPulse{from{r:16;opacity:.65}to{r:21;opacity:1}}
+.setup-action-title{font-weight:900;color:#ffd369;font-size:16px;margin-bottom:6px}.setup-help{margin-top:10px;padding:9px;border-radius:9px;background:#0a1830;color:#8be6ff;font-size:11px}.setup-option-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.setup-option-grid button{min-height:52px;font-weight:900}
+
+/* 建設：ノーマルカタンと同じ「常時一覧・自分の建設時だけ有効」 */
+.build-grid{display:grid;grid-template-columns:1fr;gap:6px}.catan-build-btn{display:grid;grid-template-columns:42px 1fr;align-items:center;text-align:left;width:100%;min-height:54px;padding:7px 9px;border-radius:10px;background:linear-gradient(180deg,#142849,#0b1930);border:1px solid #385579}.catan-build-btn:not(:disabled):hover{outline:2px solid #ffd369;outline-offset:-2px}.build-icon-wrap{height:36px;display:grid;place-items:center;border-right:1px solid #304867;margin-right:7px}.build-copy{min-width:0}.build-copy strong{display:block;font-size:12px;color:#fff}.build-costs{display:flex;gap:3px;flex-wrap:wrap;margin-top:4px}.cost-chip{font-size:9px;padding:2px 5px;border-radius:10px;border:1px solid #ffffff38;background:#071120}.piece-icon{display:inline-block}.piece-triangle{width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-bottom:20px solid var(--gold);filter:drop-shadow(0 1px 1px #000)}.piece-square{width:19px;height:19px;background:var(--gold);border:2px solid #0a101b;border-radius:2px}.piece-spaceport{font-size:26px;color:#ffd369;font-weight:900;line-height:1}.piece-tech{font-size:23px;color:#8bdcff;font-weight:900}.stock-shape.triangle{display:inline-block;width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:10px solid currentColor;margin-right:4px}
+
+/* ダイスPOP：ノーマルカタンの中央演出型 */
+.dice-overlay{position:fixed;inset:0;z-index:160;display:grid;place-items:center;background:#02050a66;opacity:0;pointer-events:none;transition:opacity .15s}.dice-overlay.show{opacity:1;pointer-events:auto}.dice-pop-card{min-width:300px;text-align:center;padding:22px 30px 20px;border-radius:20px;border:2px solid #f0d282;background:linear-gradient(180deg,#17345c,#0a162b);box-shadow:0 22px 70px #000c,0 0 28px #ffd36933;transform:scale(.92);transition:transform .18s}.dice-overlay.show .dice-pop-card{transform:scale(1)}.dice-actor{font-weight:900;color:#ffd369;font-size:15px;margin-bottom:12px}.dice-stage{display:flex;justify-content:center;gap:20px}.die-face{width:72px;height:72px;background:#f7f7f2;border-radius:12px;border:3px solid #d6d5ce;box-shadow:inset 0 -6px 0 #d5d4cf,0 7px 14px #0008;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:10px;transform:rotate(0deg);transition:transform .07s}.die-face .dot{width:11px;height:11px;border-radius:50%;background:#192033;align-self:center;justify-self:center;opacity:0}.die-face[data-face="1"] .dot:nth-child(5),.die-face[data-face="2"] .dot:nth-child(1),.die-face[data-face="2"] .dot:nth-child(9),.die-face[data-face="3"] .dot:nth-child(1),.die-face[data-face="3"] .dot:nth-child(5),.die-face[data-face="3"] .dot:nth-child(9),.die-face[data-face="4"] .dot:nth-child(1),.die-face[data-face="4"] .dot:nth-child(3),.die-face[data-face="4"] .dot:nth-child(7),.die-face[data-face="4"] .dot:nth-child(9),.die-face[data-face="5"] .dot:nth-child(1),.die-face[data-face="5"] .dot:nth-child(3),.die-face[data-face="5"] .dot:nth-child(5),.die-face[data-face="5"] .dot:nth-child(7),.die-face[data-face="5"] .dot:nth-child(9),.die-face[data-face="6"] .dot:nth-child(1),.die-face[data-face="6"] .dot:nth-child(3),.die-face[data-face="6"] .dot:nth-child(4),.die-face[data-face="6"] .dot:nth-child(6),.die-face[data-face="6"] .dot:nth-child(7),.die-face[data-face="6"] .dot:nth-child(9){opacity:1}.dice-total{height:42px;margin-top:10px;font-weight:900}.dice-total span{display:inline-grid;place-items:center;min-width:48px;height:38px;padding:0 12px;border-radius:20px;background:#ffd369;color:#151515;font-size:22px;box-shadow:0 0 18px #ffd36955}
+
+@media(max-width:760px){.ship-legend{right:6px;bottom:6px}.dice-pop-card{min-width:260px;padding:18px}.die-face{width:62px;height:62px}.setup-option-grid{grid-template-columns:1fr}.catan-build-btn{min-height:50px}}
+
+
+/* =========================================================
+   v2.4 飛行：探索地点で一旦停止 → 残り移動力で再選択
+   ========================================================= */
+.ship-movable-ring{fill:#65f0c71b;stroke:#76ffd8;stroke-width:3.5;filter:drop-shadow(0 0 8px #51efc6);pointer-events:none;animation:shipMovePulse .8s ease-in-out infinite alternate}
+.ship-shape.ship-movable{stroke:#dffff6;stroke-width:3.5;filter:drop-shadow(0 0 7px #63efce) drop-shadow(0 2px 2px #000b)}
+@keyframes shipMovePulse{from{opacity:.58;transform:scale(.94);transform-origin:center}to{opacity:1;transform:scale(1.12);transform-origin:center}}
+.movement-target-ring{fill:#55e9c526;stroke:#75ffdc;stroke-width:3;filter:drop-shadow(0 0 7px #42deb9);pointer-events:none;transition:.1s}
+.movement-target-ring.hover{fill:#ffd36955;stroke:#fff2a5;stroke-width:5;filter:drop-shadow(0 0 11px #ffd369)}
+.movement-target-ring.jump-target{fill:#ae70ff2b;stroke:#cc9cff}
+.movement-target-hit{fill:#fff0;stroke:none;cursor:pointer}
+.movement-target-hit:hover{fill:#fff1}
+.movement-target-distance{fill:#effffb;font-size:10px;font-weight:900;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#08121e;stroke-width:3px}
+
+
+/* =========================================================
+   v2.4 ノーマルカタン共通UI寄せ / 高密度レイアウト
+   ========================================================= */
+.layout{grid-template-columns:220px minmax(720px,1fr) 470px;gap:6px;padding:6px;max-width:none;margin:0;width:100%}
+.left-panel,.right-panel{gap:6px}.panel{border-radius:10px;padding:9px}.topbar{padding:0 10px}.center-panel{min-width:0}
+.board-wrap{border-radius:12px;min-height:520px}#spaceBoard{min-height:520px}.home-systems{gap:5px;margin-top:5px}.log-panel{margin-top:5px}
+.build-resource-row{display:grid;grid-template-columns:1.1fr .9fr;gap:6px;align-items:start}.trade-panels{display:grid;grid-template-columns:1fr 1fr;gap:6px}.friendship-wrap{max-height:190px;overflow:auto}
+.resource-panel .resource-row{margin:3px 0;padding:5px 6px;grid-template-columns:1fr 34px}.resource-panel .resource-count{font-size:15px}.resource-panel .supply-mini{display:none}
+.build-panel .build-grid{gap:4px}.build-panel .catan-build-btn{min-height:46px;padding:5px 7px;grid-template-columns:34px 1fr}.build-panel .build-icon-wrap{height:30px;margin-right:5px}.build-panel .build-copy strong{font-size:11px}.build-panel .cost-chip{font-size:8px;padding:1px 4px}
+.action-panel{min-height:112px}.player-card{margin:4px 0;padding:7px}.mothership-panel .mothership{padding:2px}.stock-grid{gap:4px}.stock-item{padding:5px}
+/* コロニースポット：白丸=利用可能、赤い×=特殊惑星で封鎖 */
+.site-dot{fill:#07111e;stroke:#f0f6ff;stroke-width:2.8}.site-dot.blocked{fill:#35151b;stroke:#ff646d;stroke-width:3}.site-block-x{stroke:#ff8c92;stroke-width:3;stroke-linecap:round;pointer-events:none}
+.site-key{font-weight:800}.site-key.open{color:#f3f7ff}.site-key.blocked{color:#ff8c92}
+/* 宇宙港：植民地の円より明確に大きいダイヤ型ドック */
+.spaceport-halo{fill-opacity:.28;stroke:#fff;stroke-width:4;filter:drop-shadow(0 0 7px #ffffff77)}.spaceport-core{stroke:#07111d;stroke-width:2}.spaceport-mark{fill:#fff;font-size:10px;font-weight:900;text-anchor:middle;dominant-baseline:middle;pointer-events:none}
+/* 移動可能船：船を中心に大きく広がる波紋 */
+.ship-movable-ring{fill:#70f1cc24;stroke:#b6ffec;stroke-width:3.5;filter:drop-shadow(0 0 9px #66f0cd);pointer-events:none}
+.ship-movable-wave{fill:none;stroke:#70f1cc;stroke-width:3;pointer-events:none;transform-box:fill-box;transform-origin:center;animation:shipWave 1.45s ease-out infinite}
+.ship-movable-wave.wave-b{animation-delay:.65s}
+@keyframes shipWave{0%{opacity:.9;transform:scale(.75)}75%{opacity:.16}100%{opacity:0;transform:scale(2.65)}}
+.ship-shape.ship-movable{stroke:#fff;stroke-width:4;filter:drop-shadow(0 0 10px #63efce) drop-shadow(0 2px 2px #000b)}
+/* 通常カタン型ダイスボタン・2秒中央POP */
+.dice-roll-btn{width:100%;min-height:50px;font-size:16px;font-weight:900;background:linear-gradient(180deg,#e0a72b,#9c6b10);border-color:#ffe197;color:#fff}
+.dice-overlay{background:#02050a44}.dice-pop-card{border-color:#e3b84e;background:linear-gradient(180deg,#fffdf5,#eee6d1);color:#25231f;box-shadow:0 22px 70px #000b,0 0 26px #e2ad3155}.dice-actor{color:#8a6115}.dice-total span{background:#d49b2c;color:#fff}
+/* プレイヤー交易：通常カタンの 相手→渡す/貰う→提案→YES/NO */
+.trade-open-btn{width:100%;min-height:44px;font-weight:900}.player-card.tradeable{cursor:pointer}.player-card.tradeable:hover{outline:2px solid #67d4ff;outline-offset:-1px}
+.trade-builder{display:grid;gap:12px}.trade-target-list{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.trade-target-list button.selected{outline:3px solid #ffd369;background:#26385b}.trade-side{border:1px solid #304b70;border-radius:10px;padding:9px;background:#071326}.trade-side h3{margin:0 0 7px;font-size:13px}.trade-resource-line{display:grid;grid-template-columns:1fr 32px 36px 32px;gap:4px;align-items:center;margin:4px 0}.trade-resource-line button{padding:5px 0}.trade-resource-line b{text-align:center}.trade-summary{padding:9px;border-radius:9px;background:#111e35;color:#d5e5f7;font-size:12px}.trade-response{font-size:25px;font-weight:900;text-align:center;padding:12px;border-radius:12px}.trade-response.yes{color:#5ee6a4;background:#0a392a}.trade-response.no{color:#ff7d85;background:#3b171b}
+/* 遭遇結果の最終確認BOX */
+.encounter-finish{border:1px solid #50759d;border-radius:12px;background:#071326;padding:10px;margin-top:10px}.encounter-finish-title{font-weight:900;color:#ffd369;margin-bottom:7px}.encounter-finish-line{padding:5px 0;border-bottom:1px solid #1d3452;font-size:12px;color:#d0e0f3}.encounter-finish-line:last-child{border-bottom:0}
+@media(max-width:1350px){.layout{grid-template-columns:205px minmax(650px,1fr) 420px}.build-resource-row{grid-template-columns:1fr 1fr}}
+@media(max-width:1100px){.layout{grid-template-columns:200px minmax(600px,1fr)}.right-panel{grid-column:1/-1;display:block}.build-resource-row,.trade-panels{display:grid;grid-template-columns:1fr 1fr}.right-panel>.panel,.right-panel>.build-resource-row,.right-panel>.trade-panels{margin-top:6px}}
+@media(max-width:760px){.layout{display:block;padding:4px}.build-resource-row,.trade-panels{grid-template-columns:1fr 1fr}.ship-legend{font-size:9px;gap:7px;flex-wrap:wrap;max-width:70%}.friendship-wrap{max-height:none}}
+
+
+/* =========================================================
+   v2.5 固定ダイス / 左詰め / 現在状況拡張 / 探索警告
+   ========================================================= */
+html,body,#app,.screen{width:100%;max-width:none}
+.topbar{padding-left:4px;padding-right:8px}
+.layout{grid-template-columns:214px minmax(640px,1fr) 540px;gap:5px;padding:5px 4px 5px 0;max-width:none;margin:0;width:100%}
+.left-panel{margin-left:0}.right-panel{min-width:0}.action-panel{min-height:205px;padding:9px 10px}
+.build-resource-row{display:grid;grid-template-columns:minmax(300px,1.18fr) minmax(190px,.82fr);gap:5px;align-items:stretch}
+.build-resource-row>.panel{min-width:0;height:100%}
+.resource-panel .resources{display:flex;flex-direction:column;height:100%}
+
+/* 固定ダイス表示：現在状況枠内でロールし、最後の出目を常時保持 */
+.dice-dock{display:grid;grid-template-columns:minmax(130px,1fr) auto;grid-template-areas:"head dice";align-items:center;gap:8px;margin:-2px 0 9px;padding:8px 10px;border:1px solid #375981;border-radius:10px;background:linear-gradient(180deg,#0a1b35,#071226);box-shadow:inset 0 0 18px #64d8ff0d}
+.dice-dock-head{grid-area:head;min-width:0}.dice-dock-head span{display:block;color:#8fc7e9;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.dice-dock-head strong{display:block;color:#ffd369;font-size:22px;line-height:1.1;margin-top:3px}
+.dice-stage-fixed{grid-area:dice;gap:8px;margin:0}.die-face-fixed{width:46px;height:46px;border-width:2px;border-radius:9px;padding:6px;box-shadow:inset 0 -4px 0 #d5d4cf,0 5px 10px #0007}.die-face-fixed .dot{width:7px;height:7px}
+.dice-dock.rolling{border-color:#ffd369;box-shadow:0 0 16px #ffd36933,inset 0 0 18px #64d8ff18}.dice-dock.rolling .die-face-fixed{animation:fixedDiceShake .16s linear infinite}.dice-dock.settled{animation:diceDockFlash .45s ease-out}
+@keyframes fixedDiceShake{0%{translate:-1px 0}50%{translate:2px -1px}100%{translate:-1px 1px}}
+@keyframes diceDockFlash{0%{box-shadow:0 0 0 #ffd36900}45%{box-shadow:0 0 24px #ffd36988}100%{box-shadow:0 0 0 #ffd36900}}
+/* 旧中央ダイスPOPは使用しない */
+.dice-overlay{display:none!important}
+
+.discovery-alert{text-align:center;padding:4px 2px}.discovery-kicker{font-size:10px;color:#8da8c3;letter-spacing:.05em;margin-bottom:8px}.discovery-alert h2{font-size:27px;margin:4px 0 12px}.discovery-requirement{display:inline-flex;align-items:center;gap:8px;border-radius:14px;padding:9px 16px;font-weight:900;margin-bottom:5px}.discovery-requirement b{font-size:28px}.pirate-alert h2{color:#ff7b82}.pirate-alert .discovery-requirement{background:#3a1218;border:1px solid #a74149;color:#ffc3c6}.ice-alert h2{color:#8ee8ff}.ice-alert .discovery-requirement{background:#0b2b3d;border:1px solid #3c8fb2;color:#c7f5ff}
+
+@media(max-width:1300px) and (min-width:1101px){.layout{grid-template-columns:205px minmax(570px,1fr) 490px}.build-resource-row{grid-template-columns:minmax(270px,1.15fr) minmax(175px,.85fr)}}
+@media(max-width:1100px){.layout{padding-left:0}.right-panel .action-panel{grid-row:auto}.build-resource-row{grid-template-columns:1.15fr .85fr}.dice-dock{grid-template-columns:1fr auto}}
+@media(max-width:760px){.build-resource-row{grid-template-columns:1fr 1fr;gap:4px}.dice-dock{grid-template-columns:1fr auto}.die-face-fixed{width:42px;height:42px}.dice-dock-head strong{font-size:18px}}
+
+
+/* v2.7: fixed production + mothership roll docks */
+.roll-docks{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:-2px 0 9px}
+.roll-dock-card{margin:0;min-width:0}
+.mothership-dock{display:grid;grid-template-columns:minmax(120px,1fr) auto;grid-template-areas:"mhead mballs";align-items:center;gap:8px;padding:8px 10px;border:1px solid #5d4f86;border-radius:10px;background:linear-gradient(180deg,#17142f,#0b0d21);box-shadow:inset 0 0 18px #bd87ff10}
+.mothership-dock-head{grid-area:mhead;min-width:0}.mothership-dock-head span{display:block;color:#c7a7ef;font-size:10px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.mothership-dock-head strong{display:block;color:#e4c5ff;font-size:18px;line-height:1.1;margin-top:3px;white-space:nowrap}
+.mothership-ball-stage{grid-area:mballs;display:flex;gap:8px;align-items:center;justify-content:center;min-width:102px}
+.mother-ball{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;border:2px solid #e9f2ff;box-shadow:inset -7px -8px 12px #0005,inset 5px 5px 10px #fff4,0 5px 10px #0008;font-weight:1000;font-size:18px;color:#10131a;transition:background .08s,transform .08s}
+.mother-ball.neutral{background:#68758a;color:#fff}.mother-ball.yellow{background:#ffd84e}.mother-ball.red{background:#ef5a62;color:#fff}.mother-ball.blue{background:#50a9ff;color:#fff}.mother-ball.black{background:#111722;color:#fff;border-color:#ffdf6e;box-shadow:inset -7px -8px 12px #000b,inset 4px 4px 8px #ffffff18,0 0 13px #ffd36988}
+.mothership-dock.rolling{border-color:#dab7ff;box-shadow:0 0 17px #bd87ff55,inset 0 0 18px #bd87ff18}.mothership-dock.rolling .mother-ball{animation:motherBallShake .14s linear infinite}.mothership-dock.settled{animation:motherDockFlash .5s ease-out}
+@keyframes motherBallShake{0%{transform:translate(-2px,-2px) rotate(-10deg) scale(.96)}25%{transform:translate(3px,0) rotate(8deg) scale(1.03)}50%{transform:translate(-1px,3px) rotate(-5deg) scale(.98)}75%{transform:translate(2px,-1px) rotate(7deg) scale(1.04)}100%{transform:translate(-2px,-2px) rotate(-10deg) scale(.96)}}
+@keyframes motherDockFlash{0%{box-shadow:0 0 0 #bd87ff00}45%{box-shadow:0 0 26px #bd87ffaa}100%{box-shadow:0 0 0 #bd87ff00}}
+.encounter-pop{position:fixed;left:50%;top:42%;transform:translate(-50%,-50%) scale(.7);z-index:260;pointer-events:none;opacity:0;padding:20px 40px;border:2px solid #ffd369;border-radius:20px;background:linear-gradient(180deg,#32121d,#130910);color:#fff4d0;font-size:36px;font-weight:1000;letter-spacing:.12em;box-shadow:0 0 45px #ffb52f88,0 20px 70px #000d;text-shadow:0 0 15px #ffbd3b;animation:encounterPop 1.25s ease-out forwards}
+@keyframes encounterPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}18%{opacity:1;transform:translate(-50%,-50%) scale(1.12)}32%{transform:translate(-50%,-50%) scale(1)}78%{opacity:1}100%{opacity:0;transform:translate(-50%,-55%) scale(1.03)}}
+.bank-action-row{display:grid;grid-template-columns:minmax(110px,.9fr) minmax(120px,1.1fr);gap:6px;align-items:stretch}.bank-rate-badge{display:flex;align-items:center;justify-content:center;min-height:38px;padding:6px 8px;border:1px solid #3a587e;border-radius:9px;background:#09162b;color:#b7cbe1;font-size:10px;text-align:center}.bank-rate-badge b{color:#ffd369;font-size:15px;margin-left:4px}.bank-action-row button{width:100%}
+@media(max-width:1180px){.roll-docks{grid-template-columns:1fr}.mothership-dock,.dice-dock{grid-template-columns:1fr auto}}
+@media(max-width:760px){.roll-docks{grid-template-columns:1fr 1fr;gap:4px}.mothership-dock{padding:6px}.mother-ball{width:40px;height:40px}.mothership-dock-head strong{font-size:15px}.bank-action-row{grid-template-columns:1fr 1fr}}
+
+
+/* =========================================================
+   v2.8 特殊惑星 / 交易タイル / 7捨て / 縦パネル
+   ========================================================= */
+/* 移動可能船：中心から真円で広がるだけ。既存リングの左右揺れ/拡縮を停止 */
+.ship-movable-ring{animation:none!important;transform:none!important}
+.ship-movable-wave{animation:shipWaveRadial 1.45s ease-out infinite!important;transform:none!important;transform-origin:initial!important}
+.ship-movable-wave.wave-b{animation-delay:.65s!important}
+@keyframes shipWaveRadial{0%{opacity:.88;r:18px}72%{opacity:.18}100%{opacity:0;r:50px}}
+
+/* 海賊基地・凍土：公開後も種類と必要値を常時明示 */
+.special-planet-ring{fill:none;stroke-width:4;pointer-events:none}
+.special-planet-ring.pirate{stroke:#ff626c;filter:drop-shadow(0 0 7px #ff4c59aa)}
+.special-planet-ring.ice{stroke:#72e6ff;filter:drop-shadow(0 0 7px #59dfffaa)}
+.special-planet-badge{stroke-width:1.5;pointer-events:none}
+.special-planet-badge.pirate{fill:#49171d;stroke:#ff7f86}.special-planet-badge.ice{fill:#0b3445;stroke:#7ce9ff}
+.special-planet-badge-text{fill:#fff;font-size:9px;font-weight:1000;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#08101b;stroke-width:2px}
+.special-planet-icon{fill:#fff;font-size:19px;font-weight:1000;text-anchor:middle;dominant-baseline:middle;pointer-events:none;paint-order:stroke;stroke:#08101b;stroke-width:2px}
+
+/* 交易タイル：上=種族、左下=0/5、右下=プレイヤー色の交易基地■ */
+.outpost-lobe{fill:#15152dcc;stroke:#836bad;stroke-width:2.3}
+.outpost-species-circle{fill:#241a3bcc;stroke:#c49cff;stroke-width:2.5;pointer-events:none}
+.outpost-species-hit{fill:#fff0;stroke:none;cursor:pointer}.outpost-species-hit:hover{fill:#d7b8ff18;stroke:#e0c3ff;stroke-width:2}
+.outpost-species-icon{font-size:19px;text-anchor:middle;pointer-events:none}.outpost-species-name{fill:#f0e4ff;font-size:8px;font-weight:900;text-anchor:middle;pointer-events:none}
+.outpost-count{fill:#fff;font-size:18px;font-weight:1000;text-anchor:middle;pointer-events:none}.outpost-count-label{fill:#bba8d4;font-size:8px;font-weight:800;text-anchor:middle;pointer-events:none}
+.outpost-station-piece{stroke:#fff;stroke-width:1.5;filter:drop-shadow(0 1px 2px #000b);pointer-events:none}.outpost-empty-mark{fill:#65718a;font-size:18px;text-anchor:middle;opacity:.55;pointer-events:none}
+.outpost-card-list{display:grid;gap:7px}.outpost-card-preview{border:1px solid #3b5577;border-radius:9px;padding:8px;background:#08152a}.outpost-card-preview b{display:block;color:#ffd369;margin-bottom:3px}.outpost-card-preview span{font-size:11px;color:#c3d4e8;line-height:1.5}
+
+/* 建設と資源は右欄いっぱいを使って縦並び。どちらも2列×最大3段 */
+.build-resource-row{display:flex!important;flex-direction:column!important;gap:5px!important;align-items:stretch!important}
+.build-resource-row>.panel{width:100%!important;height:auto!important}
+.build-panel .build-grid{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important}
+.resource-panel .resources{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:4px!important;height:auto!important}
+.resource-panel .resource-row{margin:0!important;min-height:38px}
+
+/* 7：通常カタン型の資源選択→必要枚数ちょうどで確定 */
+.discard-picker-status{text-align:center;font-size:15px;padding:8px;border-radius:9px;background:#111f37;color:#cfe2f6;margin:8px 0}.discard-picker-status b{font-size:22px;color:#ffd369}
+.discard-picker{display:grid;gap:5px}.discard-picker-row{display:grid;grid-template-columns:1fr 34px 38px 34px;gap:5px;align-items:center;padding:7px 8px;border:1px solid #294361;border-radius:9px;background:#081529}.discard-resource-name{font-weight:800}.discard-resource-name small{color:#849ab4;font-weight:500;margin-left:5px}.discard-picker-row b{text-align:center;font-size:18px}.discard-picker-row button{padding:6px 0;font-size:18px;font-weight:900}
+.discard-picker-summary{margin-top:8px;padding:8px;border-radius:8px;background:#0e1b30;text-align:center;color:#d7e5f5;min-height:36px}
+
+@media(max-width:1100px){.build-resource-row{display:flex!important}.resource-panel .resources,.build-panel .build-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}}
+@media(max-width:760px){.build-resource-row{display:flex!important}.resource-panel .resources,.build-panel .build-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}.discard-picker-row{grid-template-columns:1fr 32px 34px 32px}}
+
+/* v2.9: 建設一覧はフェイズ外でも通常表示。クリック可否だけJSで制御 */
+.catan-build-btn.build-nonclick{opacity:1!important;filter:none!important;cursor:default!important;}
+.catan-build-btn.build-nonclick:hover{transform:none!important;filter:none!important;outline:none!important;}
+\n/* v2.10: 盤面下の旧補助枠を完全撤去 */\n.board-hint,.ship-legend,.home-systems{display:none!important}\n.player-card{position:relative;overflow:visible}\n.resource-gain-pop{\n  position:absolute;left:50%;top:50%;z-index:80;min-width:190px;max-width:270px;\n  transform:translate(-50%,calc(-50% + var(--gain-stack,0)*28px)) scale(.88);\n  opacity:0;pointer-events:none;padding:8px 10px;border-radius:11px;\n  background:rgba(4,12,25,.96);border:2px solid currentColor;box-shadow:0 0 18px rgba(110,220,255,.45),0 8px 22px rgba(0,0,0,.45);\n  color:#eaf8ff;text-align:center;transition:opacity .18s ease,transform .18s ease;\n}\n.resource-gain-pop.show{opacity:1;transform:translate(-50%,calc(-62% + var(--gain-stack,0)*28px)) scale(1)}\n.resource-gain-name{display:block;font-weight:900;font-size:11px;color:#8fdcff;margin-bottom:3px}\n.resource-gain-items{display:block;font-weight:900;font-size:13px;white-space:nowrap}\n.resource-gain-source{display:block;font-size:9px;color:#91a7bf;margin-top:3px}\n
+/* v2.11: 無料交易船獲得・遭遇カード確認 */
+.center-notice-pop{position:fixed;left:50%;top:43%;z-index:230;transform:translate(-50%,-50%) scale(.92);min-width:420px;max-width:min(680px,90vw);padding:20px 28px;border-radius:18px;background:linear-gradient(180deg,rgba(19,45,76,.98),rgba(6,15,31,.98));border:2px solid #74ddff;box-shadow:0 0 35px #53d8ff55,0 24px 70px #000c;text-align:center;animation:centerNoticeIn .18s ease forwards;pointer-events:none}.center-notice-pop.hide{opacity:0;transform:translate(-50%,-55%) scale(.96);transition:.18s}.center-notice-main{font-size:24px;font-weight:1000;color:#fff}.center-notice-sub{margin-top:7px;font-size:12px;font-weight:800;color:#ffd369}.encounter-card-recap{margin:12px 0;padding:12px 14px;border:1px solid #355b83;border-radius:12px;background:#071327;color:#cbdcf0;line-height:1.65}.encounter-card-recap-title{font-size:11px;letter-spacing:.08em;color:#7edcff;font-weight:900;margin-bottom:5px}.encounter-actor{text-align:center;color:#9fb7d0;font-size:11px;margin-top:-6px;margin-bottom:8px}@keyframes centerNoticeIn{from{opacity:0;transform:translate(-50%,-46%) scale(.88)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+
+/* =========================================================
+   v2.12: 在庫/名声統合・資源POP・遭遇カード全分岐
+   ========================================================= */
+/* マザーシップと個人ストックは、情報を各所へ移したため左カラムから撤去 */
+.left-panel{align-self:start}
+.vp-stack{display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:96px}
+.fame-vp{font-size:9px;color:#d9c889;font-weight:800;white-space:nowrap}
+/* 建設ボタン右端に、実物の個人在庫/母船強化の現在数を常時表示 */
+.build-panel .catan-build-btn{grid-template-columns:34px minmax(0,1fr) 58px!important}
+.build-stock-badge{display:flex;align-items:center;justify-content:center;align-self:stretch;min-width:52px;border-left:1px solid #304867;color:#ffd369;font-size:15px;font-weight:1000;padding-left:5px}
+.build-stock-sub{display:block;margin-top:3px;color:#8ca7c3;font-size:8px;font-weight:700;white-space:nowrap}
+/* 無料交易船マーカーは資源欄へ */
+.resource-marker-row{border:1px solid #9b7be1!important;background:linear-gradient(180deg,#1b1738,#0c1228)!important}
+.resource-marker-row .resource-name{color:#e4d3ff;font-weight:900}.marker-note{font-size:8px;color:#ad9cc9;margin-top:2px;line-height:1.25}.resource-marker-row .resource-count{color:#e6c8ff}
+/* rerenderしても消えない全員向け資源獲得POP */
+.resource-gain-overlay{position:fixed;z-index:310;transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;padding:8px 10px;border-radius:11px;background:rgba(4,12,25,.97);border:2px solid var(--player-color,#7edcff);box-shadow:0 0 22px color-mix(in srgb,var(--player-color,#7edcff) 45%,transparent),0 10px 28px rgba(0,0,0,.55);color:#eaf8ff;text-align:center;transition:opacity .18s ease,transform .18s ease}
+.resource-gain-overlay.show{opacity:1;transform:translate(-50%,-64%) scale(1)}
+.resource-gain-overlay .resource-gain-name{display:block;font-weight:1000;font-size:11px;color:var(--player-color,#8fdcff);margin-bottom:3px}
+.resource-gain-overlay .resource-gain-items{display:block;font-weight:1000;font-size:13px;white-space:nowrap}.resource-gain-overlay .resource-gain-source{display:block;font-size:9px;color:#91a7bf;margin-top:3px}
+/* 遭遇終了時に、選ばなかった分岐も含めたカード全効果を表示 */
+.encounter-full-guide{margin:12px 0;border:1px solid #4d6788;border-radius:12px;background:#08172b;padding:10px}.encounter-full-title{font-size:13px;font-weight:1000;color:#8bdcff;margin-bottom:8px}.encounter-full-title small{display:block;color:#8099b6;font-size:9px;font-weight:700;margin-top:3px}.enc-rule-note{font-size:11px;color:#b8cae0;line-height:1.55;padding:7px 8px;margin-bottom:6px;border-radius:8px;background:#0d2039}.enc-branch{display:grid;grid-template-columns:112px minmax(0,1fr);gap:8px;padding:7px 5px;border-top:1px solid #1b3451;align-items:start}.enc-branch:first-of-type{border-top:0}.enc-branch b{color:#ffd369;font-size:11px}.enc-branch span{font-size:11px;color:#d4e2f1;line-height:1.5}.enc-branch.good b{color:#6fe8ae}.enc-branch.bad b{color:#ff8d95}
+@media(max-width:760px){.enc-branch{grid-template-columns:92px minmax(0,1fr)}.build-panel .catan-build-btn{grid-template-columns:32px minmax(0,1fr) 50px!important}.build-stock-badge{font-size:13px;min-width:46px}.fame-vp{font-size:8px}}
+
+
+/* v2.13: board -> controls -> players, with player panel at the far right */
+.layout{grid-template-columns:minmax(640px,1fr) 540px 214px;gap:5px;padding:5px 0 5px 0;max-width:none;margin:0;width:100%}
+.players-side-panel{display:flex;flex-direction:column;gap:6px;align-self:start;min-width:0}
+.players-side-panel #playersPanel{width:100%;margin:0}
+@media(max-width:1450px) and (min-width:1101px){.layout{grid-template-columns:minmax(570px,1fr) 490px 205px}}
+@media(max-width:1100px){.layout{grid-template-columns:minmax(600px,1fr) 1fr}.players-side-panel{grid-column:1/-1}.players-side-panel #playersPanel{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}}
+@media(max-width:760px){.layout{display:block;padding:4px 0}.players-side-panel{display:block}.players-side-panel #playersPanel{display:block}.players-side-panel{margin-top:6px}}
+
+
+/* =========================================================
+   v2.14: 右サイド再配分 / ログをプレイヤー欄の下へ
+   ========================================================= */
+/* 盤面を最大限確保しつつ、操作欄は見出しが折り返さない最小寄り、プレイヤー欄を拡張 */
+.layout{
+  grid-template-columns:minmax(640px,1fr) 430px 310px!important;
+  gap:5px!important;
+  padding:5px 0!important;
+}
+.right-panel{min-width:0}
+.players-side-panel{min-width:0;width:100%}
+/* タブ見出しは1行固定 */
+.right-panel .panel-title,.players-side-panel .panel-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 操作欄の無駄な左右余白を少し圧縮 */
+.right-panel .panel{padding-left:8px;padding-right:8px}
+.action-panel{padding-left:8px!important;padding-right:8px!important}
+/* 交易2枠は430px内で見出しが改行しない幅を確保 */
+.trade-panels{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important}
+.trade-panels .panel{min-width:0}
+/* プレイヤー欄は広くなった分、情報を横に使う */
+.players-side-panel #playersPanel{padding:10px}
+.players-side-panel .player-card{padding:9px 10px;margin:5px 0}
+.players-side-panel .player-top{gap:10px}
+.players-side-panel .player-mini{font-size:11px;line-height:1.45}
+.players-side-panel .vp-stack{min-width:112px}
+/* ログをプレイヤー欄直下へ。幅はプレイヤー欄と完全一致 */
+.players-log-panel{width:100%;margin:0!important;padding:9px 10px!important}
+.players-log-panel .log{max-height:280px;overflow:auto;font-size:10px;line-height:1.55}
+.players-log-panel .log-entry{padding:4px 0}
+
+@media(max-width:1450px) and (min-width:1101px){
+  .layout{grid-template-columns:minmax(570px,1fr) 405px 285px!important}
+  .right-panel .panel{padding-left:7px;padding-right:7px}
+}
+@media(max-width:1250px) and (min-width:1101px){
+  .layout{grid-template-columns:minmax(540px,1fr) 390px 270px!important}
+  .right-panel .panel-title,.players-side-panel .panel-title{font-size:11px}
+}
+@media(max-width:1100px){
+  .layout{grid-template-columns:minmax(600px,1fr) minmax(370px,430px)!important}
+  .players-side-panel{grid-column:1/-1!important;display:grid!important;grid-template-columns:minmax(0,1fr) minmax(280px,.72fr);gap:6px!important}
+  .players-side-panel #playersPanel{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .players-log-panel{align-self:stretch}
+  .players-log-panel .log{max-height:220px}
+}
+@media(max-width:760px){
+  .layout{display:block!important;padding:4px 0!important}
+  .players-side-panel{display:block!important;margin-top:6px}
+  .players-side-panel #playersPanel{display:block!important}
+  .players-log-panel{margin-top:6px!important}
+}
+
+
+/* v2.15: resource gain consolidation, pin, overflow fixes */
+.resource-gain-overlay{
+  position:fixed;z-index:240;transform:translate(-50%,-50%) scale(.9);opacity:0;pointer-events:none;
+  padding:10px 12px;border-radius:12px;background:rgba(4,12,25,.97);
+  border:2px solid var(--player-color,#7edcff);box-shadow:0 0 22px #64d8ff66,0 10px 28px #0008;
+  color:#f4fbff;text-align:center;transition:opacity .17s ease,transform .17s ease
+}
+.resource-gain-overlay.show{opacity:1;transform:translate(-50%,-62%) scale(1)}
+.resource-gain-overlay .resource-gain-name{display:block;font-weight:1000;font-size:12px;color:#8fdcff;margin-bottom:5px}
+.resource-gain-overlay .resource-gain-items{display:block;font-weight:1000;font-size:13px;white-space:normal;line-height:1.55}
+
+.pin-btn.active{background:#5b4310;border-color:#ffd369;color:#fff3bf;box-shadow:0 0 12px #ffd36955}
+.pin-select-overlay{fill:rgba(255,255,255,.001);pointer-events:all;cursor:crosshair}
+.pin-select-message{fill:#fff4bd;font-size:20px;font-weight:1000;text-anchor:middle;paint-order:stroke;stroke:#07101e;stroke-width:5px;pointer-events:none}
+.board-pin-marker{pointer-events:none}
+.board-pin-head{fill:#ff4f62;stroke:#fff;stroke-width:3;filter:drop-shadow(0 0 8px #ff536a)}
+.board-pin-stem{stroke:#ff536a;stroke-width:5;stroke-linecap:round;filter:drop-shadow(0 0 5px #ff536a)}
+.board-pin-icon{fill:#fff;font-size:9px;text-anchor:middle;dominant-baseline:middle}
+.board-pin-pulse{fill:none;stroke:#ff536a;stroke-width:4;animation:boardPinPulse 1s ease-out infinite}
+@keyframes boardPinPulse{0%{r:13;opacity:1}100%{r:42;opacity:0}}
+
+.roll-docks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important}
+.dice-dock,.mothership-dock{
+  min-width:0!important;max-width:100%!important;overflow:hidden;
+  grid-template-columns:minmax(58px,1fr) auto!important;gap:5px!important;padding:7px 7px!important
+}
+.dice-stage-fixed{min-width:0!important;gap:5px!important}
+.die-face-fixed{width:40px!important;height:40px!important;padding:5px!important;flex:0 0 auto}
+.die-face-fixed .dot{width:6px!important;height:6px!important}
+.mothership-ball-stage{min-width:0!important;gap:5px!important}
+.mother-ball{width:40px!important;height:40px!important;flex:0 0 40px;font-size:16px!important}
+.dice-dock-head strong,.mothership-dock-head strong{font-size:16px!important;white-space:nowrap}
+.dice-dock-head span,.mothership-dock-head span{font-size:9px!important}
+
+.bank-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.bank-row select{min-width:0!important}
+.bank-action-row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:5px!important}
+.bank-rate-badge,.bank-action-row button,.trade-open-btn{min-width:0!important;max-width:100%!important;width:100%!important}
+.bank-rate-badge{padding:5px 4px!important;font-size:9px!important}
+.bank-rate-badge b{font-size:13px!important}
+.trade-panels .panel{overflow:hidden}
+
+@media(max-width:1180px){
+  .roll-docks{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+}
+@media(max-width:760px){
+  .die-face-fixed,.mother-ball{width:36px!important;height:36px!important}
+}
+
+/* ===== ONLINE v3.0 ===== */
+.online-title-card{width:min(620px,96vw)}
+.server-state{margin:14px 0 8px;padding:9px 11px;border:1px solid #27476d;border-radius:10px;background:#071124;color:#9fc5e7;font-size:12px}
+.server-state.ok{border-color:#2d7b59;color:#78e7ae}.server-state.bad{border-color:#7f3943;color:#ff9aa1}
+.room-title-row{display:flex;justify-content:space-between;align-items:center;margin:18px 0 8px;color:#c7d8ec}
+.room-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.room-card{border:1px solid #2a4a72;background:#09152a;border-radius:12px;padding:10px;display:grid;grid-template-columns:1fr auto;gap:6px;align-items:center}
+.room-card.started{border-color:#a36c32}.room-card.full{opacity:.72}
+.room-name{font-weight:900;font-size:15px}.room-meta{font-size:11px;color:#94aac3;margin-top:2px}
+.room-actions{display:flex;gap:5px}.room-actions button{padding:7px 9px;font-size:11px}
+.title-message{min-height:22px;margin-top:8px;color:#ffd369;font-size:12px}
+.lobby-card{margin-left:14px}.lobby-card h2{margin:4px 0 12px}.lobby-players{display:grid;gap:7px;margin-bottom:15px}
+.lobby-player{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border:1px solid #294668;background:#091429;border-radius:10px}
+.lobby-player .seat{font-weight:900}.lobby-player .host{font-size:9px;border:1px solid #927338;color:#ffd369;border-radius:10px;padding:2px 6px}
+.lobby-waiting{padding:14px;border:1px dashed #365274;border-radius:10px;color:#9db0c7;text-align:center}
+.online-room-badge,.online-conn-badge{display:inline-flex;align-items:center;padding:5px 8px;border-radius:999px;border:1px solid #365274;font-size:10px;white-space:nowrap}
+.online-room-badge{color:#ffd369}.online-conn-badge{color:#7ce8ae;border-color:#2e7557}.online-conn-badge.offline{color:#ff9097;border-color:#7a3640}
+.remote-choice-wait{position:fixed;inset:auto 14px 14px auto;z-index:150;background:#081326;border:1px solid #355f8c;border-radius:12px;padding:10px 13px;color:#b9cee4;box-shadow:0 12px 35px #0008;font-size:11px}
+.net-reconnect-banner{position:fixed;top:72px;left:50%;transform:translateX(-50%);z-index:160;padding:10px 16px;background:#3d1720;border:1px solid #ff7d86;border-radius:12px;color:#ffd4d7;font-weight:800}
+@media(max-width:900px){#titleScreen.active{align-items:start}.lobby-card{margin-left:0;margin-top:10px}.room-grid{grid-template-columns:1fr}}

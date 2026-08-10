@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>宇宙開拓 ONLINE v3.0</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <section id="titleScreen" class="screen active">
+    <div id="roomSelectCard" class="title-card online-title-card">
+      <div class="eyebrow">PRIVATE ONLINE TABLETOP</div>
+      <h1>宇宙開拓</h1>
+      <div class="subtitle">ONLINE v3.0 / Cloudflare Durable Objects</div>
+      <label>あなたの名前
+        <input id="playerName" maxlength="12" value="SABA">
+      </label>
+      <div id="serverState" class="server-state">サーバー確認中…</div>
+      <div class="room-title-row"><b>部屋を選択</b><button id="refreshRoomsBtn" class="small">更新</button></div>
+      <div id="roomGrid" class="room-grid"></div>
+      <div id="titleMessage" class="title-message"></div>
+      <div class="mini-note">固定4部屋。部屋の「初期化」でゲーム状態・参加者を手動リセットできます。全員退出後は一定時間で自動初期化されます。</div>
+    </div>
+
+    <div id="lobbyCard" class="title-card online-title-card lobby-card" style="display:none">
+      <div class="eyebrow">ROOM LOBBY</div>
+      <h2 id="lobbyRoomName">ROOM</h2>
+      <div id="lobbyPlayers" class="lobby-players"></div>
+      <div id="hostControls" style="display:none">
+        <label>盤面セットアップ
+          <select id="setupMode">
+            <option value="beginner" selected>初心者用固定配置</option>
+            <option value="strategic">Strategic</option>
+            <option value="explorer">Explorer</option>
+            <option value="wild">Wild Space</option>
+          </select>
+        </label>
+        <button id="onlineStartBtn" class="primary big">ゲーム開始</button>
+        <div class="mini-note">3人または4人が接続していると開始できます。</div>
+      </div>
+      <div id="guestWaiting" class="lobby-waiting">ホストの開始を待っています。</div>
+      <button id="leaveRoomBtn" class="ghost big">部屋を退出</button>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <header class="topbar">
+      <div>
+        <div class="game-title">宇宙開拓 <span>ONLINE v3.0</span></div>
+        <div id="turnLabel" class="turn-label"></div>
+      </div>
+      <div class="top-actions">
+        <span id="onlineRoomBadge" class="online-room-badge"></span>
+        <span id="onlineConnBadge" class="online-conn-badge">接続中</span>
+        <button id="pinBtn" class="small pin-btn">📌 ピン差し</button>
+        <button id="rulesBtn" class="small">実装ルール</button>
+        <button id="helpBtn" class="small">遊び方</button>
+        <button id="saveBtn" class="small">同期</button>
+        <button id="resetBtn" class="small danger">部屋初期化</button>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="center-panel">
+        <div class="phasebar">
+          <div id="phaseProd" class="phase-step">1 生産</div>
+          <div id="phaseBuild" class="phase-step">2 交易・建設</div>
+          <div id="phaseFlight" class="phase-step">3 飛行</div>
+        </div>
+        <div class="board-wrap">
+          <svg id="spaceBoard" viewBox="0 0 1500 900" role="img" aria-label="宇宙盤面"></svg>
+        </div>
+      </section>
+
+      <aside class="right-panel">
+        <div class="panel action-panel">
+          <div class="panel-title">現在状況</div>
+          <div class="roll-docks">
+            <div id="diceDock" class="dice-dock roll-dock-card">
+              <div class="dice-dock-head"><span id="diceActor">直前のダイス</span><strong id="diceTotal">--</strong></div>
+              <div class="dice-stage dice-stage-fixed">
+                <div id="dieA" class="die-face die-face-fixed" data-face="1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+                <div id="dieB" class="die-face die-face-fixed" data-face="1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+              </div>
+            </div>
+            <div id="mothershipDock" class="mothership-dock roll-dock-card">
+              <div class="mothership-dock-head"><span id="mothershipActor">マザーシップ</span><strong id="mothershipTotal">--</strong></div>
+              <div class="mothership-ball-stage">
+                <div id="motherBallA" class="mother-ball neutral"><span>?</span></div>
+                <div id="motherBallB" class="mother-ball neutral"><span>?</span></div>
+              </div>
+            </div>
+          </div>
+          <div id="actionArea"></div>
+        </div>
+
+        <div class="panel build-panel">
+          <div class="panel-title">建設</div>
+          <div id="buildArea" class="build-grid"></div>
+        </div>
+        <div class="panel resource-panel">
+          <div class="panel-title">自分の資源</div>
+          <div id="resourcePanel" class="resources"></div>
+        </div>
+        <div class="trade-panels">
+          <div class="panel"><div class="panel-title">銀行交易</div><div id="bankTradeArea"></div></div>
+          <div class="panel"><div class="panel-title">プレイヤーと交易</div><div id="playerTradeArea"></div></div>
+        </div>
+        <div class="panel friendship-wrap"><div class="panel-title">友好カード</div><div id="friendshipPanel"></div></div>
+      </aside>
+
+      <aside class="players-side-panel">
+        <div id="playersPanel" class="panel"></div>
+        <div class="panel log-panel players-log-panel"><div class="panel-title">航海ログ</div><div id="log" class="log"></div></div>
+      </aside>
+    </main>
+  </section>
+</div>
+
+<div id="modalBackdrop" class="modal-backdrop"><div id="modal" class="modal"></div></div>
+<div id="toast" class="toast"></div>
+<script src="config.js"></script>
+<script src="online.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
