@@ -1063,3 +1063,98 @@ html,body{height:100%;overflow:hidden}
   #gameScreen .resource-panel .resource-name{font-size:11px!important}
   #gameScreen .resource-panel .resource-count{font-size:16px!important}
 }
+
+
+/* =========================================================
+   ONLINE v3.2.6 - 建設費を最優先で読みやすく
+   ========================================================= */
+@media (min-width:1101px){
+  #gameScreen .build-panel{
+    padding:5px 6px!important;
+  }
+  #gameScreen .build-panel .panel-title{
+    font-size:14px!important;
+    line-height:1.05!important;
+    margin:0 0 3px!important;
+  }
+  #gameScreen .build-panel .build-grid{
+    height:calc(100% - 19px)!important;
+    gap:3px!important;
+  }
+  #gameScreen .build-panel .catan-build-btn{
+    min-height:0!important;
+    padding:2px 4px!important;
+    grid-template-columns:27px minmax(0,1fr) 42px!important;
+    column-gap:3px!important;
+    border-radius:8px!important;
+  }
+  #gameScreen .build-panel .build-icon-wrap{
+    height:27px!important;
+    min-height:27px!important;
+    margin:0 2px 0 0!important;
+  }
+  #gameScreen .build-panel .piece-triangle{
+    border-left-width:8px!important;
+    border-right-width:8px!important;
+    border-bottom-width:16px!important;
+  }
+  #gameScreen .build-panel .piece-square{
+    width:16px!important;height:16px!important;
+  }
+  #gameScreen .build-panel .piece-spaceport{
+    font-size:21px!important;
+  }
+  #gameScreen .build-panel .piece-tech{
+    font-size:20px!important;
+  }
+  #gameScreen .build-panel .build-copy{
+    display:flex!important;
+    flex-direction:column!important;
+    justify-content:center!important;
+    min-width:0!important;
+  }
+  #gameScreen .build-panel .build-copy strong{
+    font-size:14px!important;
+    line-height:1.05!important;
+    margin:0 0 2px!important;
+    font-weight:1000!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .build-panel .build-costs{
+    display:flex!important;
+    gap:3px!important;
+    margin:0!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+  }
+  #gameScreen .build-panel .cost-chip{
+    font-size:12px!important;
+    line-height:1!important;
+    font-weight:1000!important;
+    padding:3px 5px!important;
+    min-width:0!important;
+    border-radius:7px!important;
+    white-space:nowrap!important;
+  }
+  #gameScreen .build-stock-badge{
+    font-size:13px!important;
+    min-width:42px!important;
+    padding:2px!important;
+    line-height:1.05!important;
+  }
+  #gameScreen .build-stock-sub{
+    font-size:9px!important;
+    line-height:1!important;
+    margin-top:1px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+}
+
+/* 画面高さが低くても建設費は小さくしすぎない */
+@media (max-height:820px) and (min-width:1101px){
+  #gameScreen .build-panel .build-copy strong{font-size:13px!important}
+  #gameScreen .build-panel .cost-chip{font-size:11px!important;padding:2px 4px!important}
+  #gameScreen .build-stock-badge{font-size:12px!important}
+}
