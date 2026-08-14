@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <title>宇宙開拓 ONLINE v3.2.9</title>
-  <link rel="stylesheet" href="style.css?v=3.2.9">
+  <title>宇宙開拓 ONLINE v3.2.11</title>
+  <link rel="stylesheet" href="style.css?v=3.2.11">
 </head>
 <body>
 <div id="app">
@@ -12,7 +12,7 @@
     <div id="roomSelectCard" class="title-card online-title-card">
       <div class="eyebrow">PRIVATE ONLINE TABLETOP</div>
       <h1>宇宙開拓</h1>
-      <div class="subtitle">ONLINE v3.2.9 / Cloudflare Durable Objects</div>
+      <div class="subtitle">ONLINE v3.2.11 / Cloudflare Durable Objects</div>
       <label>あなたの名前
         <input id="playerName" maxlength="12" value="SABA">
       </label>
@@ -51,13 +51,15 @@
   <section id="gameScreen" class="screen">
     <header class="topbar">
       <div>
-        <div class="game-title">宇宙開拓 <span>ONLINE v3.2.9</span></div>
+        <div class="game-title">宇宙開拓 <span>ONLINE v3.2.11</span></div>
         <div id="turnLabel" class="turn-label"></div>
       </div>
       <div class="top-actions">
         <span id="onlineRoomBadge" class="online-room-badge"></span>
         <span id="onlineConnBadge" class="online-conn-badge">接続中</span>
-        <button id="pinBtn" class="small pin-btn">📌 ピン差し</button>
+        <button id="virtual1920Btn" class="small pc-tool-btn">1920×1080</button>
+        <button id="logBtn" class="small pc-tool-btn">ログ</button>
+        <button id="pinBtn" class="small pin-btn pc-tool-btn">📌 ピン差し</button>
         <button id="rulesBtn" class="small">実装ルール</button>
         <button id="helpBtn" class="small">遊び方</button>
         <button id="saveBtn" class="small">同期</button>
@@ -130,6 +132,6 @@
 <div id="toast" class="toast"></div>
 <script src="config.js"></script>
 <script src="online.js"></script>
-<script src="game.js?v=3.2.9"></script>
+<script src="game.js?v=3.2.11"></script>
 </body>
 </html>

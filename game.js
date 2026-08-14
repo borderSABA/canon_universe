@@ -7,7 +7,7 @@
   - ルール処理とカード効果は2019年版 Starfarers Rulebook / Almanac を参照
 */
 
-const VERSION = "3.2.9";
+const VERSION = "3.2.11";
 const SAVE_KEY = "starfarers_private_exact_v21";
 const R = ["ore","fuel","carbon","food","goods"];
 const RL = {ore:"鉱石",fuel:"燃料",carbon:"炭素",food:"食料",goods:"交易品"};
@@ -737,6 +737,42 @@ function renderPhases(){ /* フェイズ表示はトップのターン表示へ�
 function svg(tag,attrs={}){const e=document.createElementNS("http://www.w3.org/2000/svg",tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,v);return e}
 function planetFill(r){return {ore:"#b64e52",fuel:"#e1842d",carbon:"#347fbd",food:"#3c9e68",goods:"#9a73c8"}[r]}
 
+
+const VIRTUAL_1920_KEY="starfarers_virtual_1920";
+let virtual1920Mode=localStorage.getItem(VIRTUAL_1920_KEY)==="1";
+
+function updateVirtual1920Scale(){
+  if(!virtual1920Mode)return;
+  const scale=Math.min(window.innerWidth/1920,window.innerHeight/1080);
+  document.documentElement.style.setProperty("--sf-virtual-1920-scale",String(Math.max(.1,scale)));
+}
+function applyVirtual1920Mode(){
+  document.body.classList.toggle("sf-virtual-1920",virtual1920Mode);
+  const btn=$("virtual1920Btn");
+  if(btn){
+    btn.textContent=virtual1920Mode?"通常表示":"1920×1080";
+    btn.classList.toggle("active",virtual1920Mode);
+  }
+  if(virtual1920Mode)updateVirtual1920Scale();
+  else document.documentElement.style.removeProperty("--sf-virtual-1920-scale");
+}
+function toggleVirtual1920Mode(){
+  virtual1920Mode=!virtual1920Mode;
+  localStorage.setItem(VIRTUAL_1920_KEY,virtual1920Mode?"1":"0");
+  applyVirtual1920Mode();
+  render();
+}
+function showFullLog(){
+  if(!S)return;
+  const rows=S.logs.length
+    ?S.logs.slice().reverse().map(x=>`<div class="full-log-entry"><span>${x.t}</span><strong>${x.msg}</strong></div>`).join("")
+    :'<div class="trade-note">ログはまだありません。</div>';
+  modalPromise(`<h2>航海ログ</h2><div class="full-log-list">${rows}</div>`,[
+    {label:"閉じる",value:true,primary:true}
+  ]);
+}
+window.addEventListener("resize",()=>{if(virtual1920Mode)updateVirtual1920Scale()});
+
 function renderPinControl(){
   const btn=$("pinBtn");if(!btn)return;
   btn.classList.toggle("active",!!ui.pinMode);
@@ -1378,7 +1414,11 @@ function canEndAt(p,sh,nodeId,jump=false){
   if(opponentSpaceportSite(p,nodeId))return false;
   if(isDock(nodeId)){
     if(sh.type!=="trade")return false;
-    const key=n.outpost,total=totalStations(key);return total<5&&p.upgrades.freight>total&&p.stock.tradeStations>0;
+    // 交易基地コマは交易船建造時点で船に組み込まれて在庫から減っている。
+    // ドッキング時に「手元の交易基地在庫」を再要求すると最後の1隻などが不正に到達不能になるため、
+    // ここでは前哨基地の空きと貨物ポッド条件だけを判定する。
+    const key=n.outpost,total=totalStations(key);
+    return total<5&&p.upgrades.freight>total;
   }
   if(isColonySite(nodeId)){
     if(sh.type==="trade")return false;
@@ -1526,6 +1566,11 @@ function updateFriendshipMarker(key){
 }
 function endHumanTurn(){
   const p=me();if(pendingFreeTradeShipBlocks(p)){render();return}
+  const dockedTrade=p.ships.find(s=>s.type==="trade"&&isDock(s.node));
+  if(dockedTrade){
+    showToast("交易ステーション中心で飛行を終える場合は、先に交易基地を設置してください");
+    ui.selectedShip=dockedTrade.id;render();return;
+  }
   if(p.ships.some(s=>!canEndAt(p,s,s.node,false))){showToast("停止できない交点に船があります");return}
   // 植民地サイト上に前ターンから残っている植民船は、置かないならこのターン中に離れる必要がある。
   const stuck=p.ships.find(s=>s.startedOnColonySite&&isColonySite(s.node)&&s.moved===0);if(stuck){showToast("前ターンから植民地サイトにいる植民船は、植民するか移動する必要があります");return}
@@ -2161,6 +2206,8 @@ window.dispatchEvent(new Event("starfarers-api-ready"));
 
 if(window.NET?.online){
   if($("helpBtn"))$("helpBtn").onclick=helpModal;
+  if($("virtual1920Btn"))$("virtual1920Btn").onclick=toggleVirtual1920Mode;
+  if($("logBtn"))$("logBtn").onclick=showFullLog;
   if($("pinBtn"))$("pinBtn").onclick=togglePinMode;
   if($("rulesBtn"))$("rulesBtn").onclick=implementationModal;
   if($("saveBtn"))$("saveBtn").onclick=async()=>{await window.NET.flushState(S);showToast("同期しました。");};
@@ -2169,11 +2216,15 @@ if(window.NET?.online){
   if($("startBtn"))$("startBtn").onclick=async()=>{newGame($("playerName").value,Number($("playerCount").value),$("setupMode").value);showScreen("gameScreen");render();if(!S.setupComplete)await runAdvancedSetup();else if(!player().human)setTimeout(cpuTurn,450)};
   if($("continueBtn"))$("continueBtn").onclick=async()=>{if(load()){showScreen("gameScreen");render();if(!S.setupComplete)await runAdvancedSetup();else if(!player().human)setTimeout(cpuTurn,450)}};
   if($("helpBtn"))$("helpBtn").onclick=helpModal;
+  if($("virtual1920Btn"))$("virtual1920Btn").onclick=toggleVirtual1920Mode;
+  if($("logBtn"))$("logBtn").onclick=showFullLog;
   if($("pinBtn"))$("pinBtn").onclick=togglePinMode;
   if($("rulesBtn"))$("rulesBtn").onclick=implementationModal;
   if($("saveBtn"))$("saveBtn").onclick=()=>{save();showToast("保存しました。");};
   if($("resetBtn"))$("resetBtn").onclick=resetGame;
   if(localStorage.getItem(SAVE_KEY)&&$("continueBtn"))$("continueBtn").style.display="block";
 }
+
+applyVirtual1920Mode();
 
 })();
